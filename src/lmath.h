@@ -1,5 +1,9 @@
 #pragma once
 
+#define MIN(a, b) ((a) < (b) ? (a) : (b))
+#define MAX(a, b) ((a) > (b) ? (a) : (b))
+#define CLAMP(v, min, max) (MAX(MIN(v, max), min))
+
 typedef union {
 	float cmps[3];
 	struct {
@@ -50,3 +54,6 @@ m4 m4_translation(v3 t);
 m4 m4_perspective(float near, float far, float ratio, float fov);
 v3 project(v4 v);
 v3 clip_to_scr(v3 v, int win_w, int win_h);
+
+/* shenanigans */
+float rand_float(void);

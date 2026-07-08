@@ -2,7 +2,9 @@
 
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
+
 
 v4 v4mk(float x, float y, float z, float w)
 {
@@ -173,5 +175,10 @@ m4 m4_perspective(float near, float far, float ratio, float fov)
 	p.f23 = -far * near / (far - near);
 	p.f32 = 1.0f;
 	return p;
+}
+
+float rand_float(void)
+{
+    return (float)rand() / (float)RAND_MAX;
 }
 

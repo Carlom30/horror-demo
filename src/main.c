@@ -11,15 +11,13 @@
 
 int main(void)
 {
+	v3 p0 = v3mk(0.0f, 0.0f, 4.0f);
+	v3 p1 = v3mk(0.0f, 2.0f, 4.0f);
+	v3 p2 = v3mk(2.0f, 0.0f, 4.0f);
 	mesh cubes[] = {
-		mesh_cube(),
-		mesh_cube(),
-		mesh_cube()
-	};
-	v3 poses[ARRAY_SIZE(cubes)] = {
-		v3mk(0.0f, 0.0f, 5.0f),
-		v3mk(2.0f, 0.0f, 5.0f),
-		v3mk(0.0f, 2.0f, 5.0f)
+		mesh_cube(&p0),
+		mesh_cube(&p1),
+		mesh_cube(&p2)
 	};
 	int ww = 1280;
 	int wh = 720;
@@ -72,7 +70,7 @@ int main(void)
 				m4 tr = m4_rotation_y(theta);
 				tr = m4mul(m4_rotation_x(theta), tr);
 				tr = m4mul(m4_rotation_z(theta), tr);
-				tr = m4mul(m4_translation(poses[c]), tr);
+				tr = m4mul(m4_translation(cube.pos), tr);
 				tr = m4mul(persp, tr);
 				p0 = m4v4mul(tr, p0);
 				p1 = m4v4mul(tr, p1);

@@ -17,7 +17,8 @@ typedef struct {
 
 typedef struct {
 	DA(triangle) tris;
+	v3 pos;
 } mesh;
 
 triangle trimk(v3, v3, v3);
-mesh mesh_cube();
+mesh mesh_cube(const v3 *pos);
