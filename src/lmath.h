@@ -33,12 +33,13 @@ typedef union {
 	};
 } m4;
 
-v4 v4mk(float, float, float, float);
-v3 v3mk(float, float, float);
-v4 v3v4(v3 v);
-v3 v4v3(v4 v);
 void v3_print(v3);
 void v4_print(v4);
+v4 v4mk(float, float, float, float);
+v3 v3mk(float, float, float);
+v4 v3v4(v3);
+v3 v4v3(v4);
+v3 cross_product(v3, v3);
 
 /* matrix */
 m4 m4_identity();
@@ -48,7 +49,7 @@ m4 m4mul(m4, m4);
 m4 m4_rotation_x(float theta);
 m4 m4_rotation_y(float theta);
 m4 m4_rotation_z(float theta);
-m4 m4_translation(v3 t);
+m4 m4_translation(v3);
 
 /* projection stuff */
 m4 m4_perspective(float near, float far, float ratio, float fov);

@@ -2,6 +2,7 @@
 
 #include "lmath.h"
 #include "utils.h"
+#include "render.h"
 
 typedef struct {
 	union {
@@ -21,4 +22,5 @@ typedef struct {
 } mesh;
 
 triangle trimk(v3, v3, v3);
+rect find_triangle_box(triangle t);
 mesh mesh_cube(const v3 *pos);

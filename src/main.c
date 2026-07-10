@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <time.h>
 #include "../libs/SDL2/include/SDL2/SDL.h"
 #include "../libs/SDL2/include/SDL2/SDL_timer.h"
 
@@ -31,8 +32,7 @@ int main(void)
 	uint64_t old = 0;
 	float one = 0;
 	m4 persp = m4_perspective(0.1f, 100.0f, (float)wh / (float)ww, M_PI / 4.0f);
-	float dz = 2.0f;
-	float theta = 0.0f;
+	float theta = rand_float() * (M_PI * 2.0f);
 	float delta_time = 0.0f;
 	while (!quit) {
 		old = now;
@@ -59,7 +59,6 @@ int main(void)
 				y--;
 		}
 		render_clear();
-		render_set_color(0, 200, 0);
 		for (int c = 0; c < ARRAY_SIZE(cubes); c++) {
 			mesh cube = cubes[c];
 			for (int i = 0; i < DA_COUNT(cube.tris); i++) {
@@ -78,9 +77,14 @@ int main(void)
 				v3 pp0 = (clip_to_scr(project(p0), ww, wh));
 				v3 pp1 = (clip_to_scr(project(p1), ww, wh));
 				v3 pp2 = (clip_to_scr(project(p2), ww, wh));
+				render_set_color(0, 200, 0);
 				render_plot_line(pp0.x, pp0.y, pp1.x, pp1.y);
 				render_plot_line(pp1.x, pp1.y, pp2.x, pp2.y);
 				render_plot_line(pp2.x, pp2.y, pp0.x, pp0.y);
+				triangle ptri = trimk(pp0, pp1, pp2);
+				rect pr = find_triangle_box(ptri);
+				render_set_color(200, 0, 0);
+				render_draw_rect(&pr);
 			}
 		}
 		theta += 1.0f * delta_time;

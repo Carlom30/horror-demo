@@ -7,9 +7,15 @@ triangle trimk(v3 p0, v3 p1, v3 p2)
 	return (triangle){ p0, p1, p2 };
 }
 
-static rect find_triangle_box(triangle t)
+rect find_triangle_box(triangle t)
 {
-	return (rect){0};
+	rect r = {
+		.x = MIN(MIN(t.p0.x, t.p1.x), t.p2.x),
+		.y = MIN(MIN(t.p0.y, t.p1.y), t.p2.y),
+	};
+	r.w = MAX(MAX(t.p0.x, t.p1.x), t.p2.x) - r.x;
+	r.h = MAX(MAX(t.p0.y, t.p1.y), t.p2.y) - r.y;
+	return r;
 }
 
 mesh mesh_cube(const v3 *pos)

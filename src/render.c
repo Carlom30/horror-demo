@@ -1,8 +1,9 @@
 #include "render.h"
 
 #include "../libs/SDL2/include/SDL2/SDL.h"
-
 #include <assert.h>
+
+#include "lmath.h"
 
 static struct {
 	SDL_Window *win;
@@ -17,6 +18,11 @@ static struct {
 static inline int bufidx(int x, int y)
 {
 	return y * render.win_w + x;
+}
+
+void rect_print(rect r)
+{
+	printf("x %d, y %d, w %d, h %d\n", r.x, r.y, r.w, r.h);
 }
 
 void render_getwh(int *w, int *h)
@@ -45,6 +51,23 @@ void render_set_color(uint8_t r, uint8_t g, uint8_t b)
 {
 	render.color = SDL_MapRGBA(SDL_GetWindowSurface(render.win)->format,
 				r, g, b, 255);
+}
+
+void render_draw_rect(const rect *r)
+{
+	assert(r);
+	for (int y = r->y; y < r->y + r->h; y++) {
+		if (!COORD_OUT_BUF_BOUND(r->x, y))
+			render.buffer[bufidx(r->x, y)] = render.color;
+		if (!COORD_OUT_BUF_BOUND(r->x + r->w, y))
+			render.buffer[bufidx(r->x + r->w, y)] = render.color;
+	}
+	for (int x = r->x; x < r->x + r->w; x++) {
+		if (!COORD_OUT_BUF_BOUND(x, r->y))
+			render.buffer[bufidx(x, r->y)] = render.color;
+		if (!COORD_OUT_BUF_BOUND(x, r->y + r->h))
+			render.buffer[bufidx(x, r->y + r->h)] = render.color;
+	}
 }
 
 void render_fill_rect(const rect *r)

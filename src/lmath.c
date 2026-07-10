@@ -5,6 +5,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
+void v3_print(v3 v)
+{
+	printf("[%f, %f, %f]\n", v.x, v.y, v.z);
+}
+
+void v4_print(v4 v)
+{
+	printf("[%f, %f, %f, %f]\n", v.x, v.y, v.z, v.w);
+}
 
 v4 v4mk(float x, float y, float z, float w)
 {
@@ -26,14 +35,13 @@ v3 v4v3(v4 v)
 	return v3mk(v.x, v.y, v.z);
 }
 
-void v3_print(v3 v)
+v3 cross_product(v3 v, v3 u)
 {
-	printf("[%f, %f, %f]\n", v.x, v.y, v.z);
-}
-
-void v4_print(v4 v)
-{
-	printf("[%f, %f, %f, %f]\n", v.x, v.y, v.z, v.w);
+	return (v3) {
+		.x = (v.y * u.z) - (v.z * u.y),
+		.y = (v.z * u.x) - (v.x * u.z),
+		.z = (v.x * u.y) - (v.y * u.x)
+	};
 }
 
 m4 m4_identity()
