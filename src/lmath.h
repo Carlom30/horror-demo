@@ -33,6 +33,14 @@ typedef union {
 	};
 } m4;
 
+/* is this a pure mathematical object? */
+typedef struct {
+	v3 pos;
+	v3 dir;
+	float yaw;
+	float pitch;
+} camera;
+
 void v3_print(v3);
 void v4_print(v4);
 v4 v4mk(float, float, float, float);
@@ -40,6 +48,10 @@ v3 v3mk(float, float, float);
 v4 v3v4(v3);
 v3 v4v3(v4);
 v3 cross_product(v3, v3);
+float v3_magn(v3);
+v3 v3_norm(v3);
+v3 v3_sum(v3, v3);
+v3 v3_times_scalar(v3, float);
 
 /* matrix */
 m4 m4_identity();
@@ -55,6 +67,13 @@ m4 m4_translation(v3);
 m4 m4_perspective(float near, float far, float ratio, float fov);
 v3 project(v4 v);
 v3 clip_to_scr(v3 v, int win_w, int win_h);
+
+/* camera */
+camera camera_mk(v3 pos, v3 dir);
+
+/* return a 0 pos z directioned camera */
+camera camera_init();
+m4 m4_camera_view(camera c);
 
 /* shenanigans */
 float rand_float(void);

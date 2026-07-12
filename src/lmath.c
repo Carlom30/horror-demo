@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <string.h>
 
 void v3_print(v3 v)
 {
@@ -42,6 +43,27 @@ v3 cross_product(v3 v, v3 u)
 		.y = (v.z * u.x) - (v.x * u.z),
 		.z = (v.x * u.y) - (v.y * u.x)
 	};
+}
+
+float v3_magn(v3 v)
+{
+	return sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
+}
+
+v3 v3_norm(v3 v)
+{
+	float m = v3_magn(v);
+	return v3mk(v.x / m, v.y / m, v.z / m);
+}
+
+v3 v3_sum(v3 u, v3 v)
+{
+	return v3mk(u.x + v.x, u.y + v.y, u.z + v.z);
+}
+
+v3 v3_times_scalar(v3 v, float f)
+{
+	return v3mk(v.x * f, v.y * f, v.z * f);
 }
 
 m4 m4_identity()
@@ -185,8 +207,45 @@ m4 m4_perspective(float near, float far, float ratio, float fov)
 	return p;
 }
 
+camera camera_mk(v3 pos, v3 dir)
+{
+	return (camera){ pos, dir };
+}
+
+camera camera_init()
+{
+	return (camera){
+		(v3){0}, (v3){ 0.0f, 0.0f, 1.0f },
+		.yaw = M_PI / 2.0f,
+	};
+}
+
+static v3 world_up = { 0.0f, 1.0f, 0.0 };
+m4 m4_camera_view(camera c)
+{
+	/* assert(v3_magn(c.dir) == 1.0f); */
+	v3 z = v3_norm(c.dir);
+	v3 x = v3_norm(cross_product(world_up, z));
+	v3 y = v3_norm(cross_product(z, x));
+	m4 view = {
+		x.x,  x.y,  x.z,  0.0f,
+		y.x,  y.y,  y.z,  0.0f,
+		z.x,  z.y,  z.z,  0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+	m4 trans = {
+		1.0f, 0.0f, 0.0f, -c.pos.x,
+		0.0f, 1.0f, 0.0f, -c.pos.y,
+		0.0f, 0.0f, 1.0f, -c.pos.z,
+		0.0f, 0.0f, 0.0f,  1.0f
+	};
+	view = m4mul(view, trans);
+	return view;
+}
+
 float rand_float(void)
 {
     return (float)rand() / (float)RAND_MAX;
 }
+
 

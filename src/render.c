@@ -44,6 +44,8 @@ int render_init(int win_w, int win_h, const char *name)
 	render.win_h = win_h;
 	render.color = SDL_MapRGBA(SDL_GetWindowSurface(render.win)->format,
 				0, 0, 0, 255);
+	SDL_SetRelativeMouseMode(SDL_TRUE);
+	SDL_WarpMouseInWindow(render.win, 0, 0);
 	return 0;
 }
 

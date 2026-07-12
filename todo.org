@@ -1,0 +1,5 @@
+* TODO main
+- [ ] iteration refactor, perspective and stuff shouldn't be on mesh.c
+- [ ] better inputs for development
+- [ ] rastering (should be fast)
+- [ ] behind near plane triangles problem

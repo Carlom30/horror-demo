@@ -18,9 +18,11 @@ typedef struct {
 
 typedef struct {
 	DA(triangle) tris;
+	float theta; /* TODO implement axis rotation */
 	v3 pos;
 } mesh;
 
 triangle trimk(v3, v3, v3);
 rect find_triangle_box(triangle t);
 mesh mesh_cube(const v3 *pos);
+void mesh_render(const mesh *m, m4 view, m4 perspective);
