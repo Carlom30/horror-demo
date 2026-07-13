@@ -51,7 +51,7 @@ void loop_init()
 	cam = camera_init();
 }
 
-void mesh_project(const mesh *m, triangle **trisproj)
+void project_mesh(const mesh *m, triangle **trisproj)
 {
 	DA_ALLOC(*trisproj);
 	int ww, wh;
@@ -125,7 +125,7 @@ void loop_main()
 		triangle *trisproj = NULL;
 		for (int c = 0; c < DA_COUNT(scene); c++) {
 			mesh *m = &scene[c];
-			mesh_project((const mesh*)m, &trisproj);
+			project_mesh((const mesh*)m, &trisproj);
 			for (int i = 0; i < DA_COUNT(trisproj); i++) {
 				triangle t = trisproj[i];
 				render_set_color(0, 200, 0);

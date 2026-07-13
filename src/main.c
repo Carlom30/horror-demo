@@ -4,8 +4,8 @@
 
 int main(void)
 {
-	int ww = 800;
-	int wh = 600;
+	int ww = 1280;
+	int wh = 720;
 	render_init(ww, wh, "game");
 	loop_init();
 	loop_main();

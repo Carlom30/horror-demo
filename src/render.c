@@ -9,16 +9,18 @@ static struct {
 	SDL_Window *win;
 	uint32_t *buffer;
 	SDL_Surface *tmpsurf;
+	int surf_w;
+	int surf_h;
 	int win_w;
 	int win_h;
 	uint32_t color;
 } render;
 
-#define COORD_OUT_BUF_BOUND(x, y) ((x) < 0 || (x) >= render.win_w || (y) < 0 || (y) >= render.win_h)
+#define COORD_OUT_BUF_BOUND(x, y) ((x) < 0 || (x) >= render.surf_w || (y) < 0 || (y) >= render.surf_h)
 
 static inline int bufidx(int x, int y)
 {
-	return y * render.win_w + x;
+	return y * render.surf_w + x;
 }
 
 void rect_print(rect r)
@@ -28,8 +30,8 @@ void rect_print(rect r)
 
 void render_getwh(int *w, int *h)
 {
-	*w = render.win_w;
-	*h = render.win_h;
+	*w = render.surf_w;
+	*h = render.surf_h;
 }
 
 /* TODO: separate rendering surface from the window surface. This way, we can render less pixel and then
@@ -42,17 +44,22 @@ int render_init(int win_w, int win_h, const char *name)
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		win_w, win_h, 0);
-	render.buffer = malloc(sizeof(uint32_t) * (win_w) * (win_h));
-	render.tmpsurf = SDL_CreateRGBSurfaceWithFormat(0,
-		win_w / 2, win_h / 2,
-		sizeof(uint32_t),
-		SDL_GetWindowSurface(render.win)->format->format);
 	render.win_w = win_w;
 	render.win_h = win_h;
 	render.color = SDL_MapRGBA(SDL_GetWindowSurface(render.win)->format,
 				0, 0, 0, 255);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(render.win, 0, 0);
+
+	/* now the real rendering surface, which will be half of the window size */
+	render.surf_w = win_w / 2;
+	render.surf_h = win_h / 2;
+	render.buffer = malloc(sizeof(uint32_t) * (render.surf_w) * (render.surf_h));
+	render.tmpsurf = SDL_CreateRGBSurfaceWithFormat(0,
+		render.surf_w,
+		render.surf_h,
+		sizeof(uint32_t),
+		SDL_GetWindowSurface(render.win)->format->format);
 	return 0;
 }
 
@@ -123,13 +130,14 @@ void render_plot_line(int x0, int y0, int x1, int y1)
 
 void render_clear()
 {
-	memset(render.buffer, 0, render.win_w * render.win_h * sizeof(uint32_t));
+	memset(render.buffer, 0, render.surf_w * render.surf_h * sizeof(uint32_t));
 }
 
 void render_update()
 {
 	SDL_Surface *winsur = SDL_GetWindowSurface(render.win);
-	memcpy(winsur->pixels, render.buffer,
-		sizeof(uint32_t) * render.win_w * render.win_h);
+	memcpy(render.tmpsurf->pixels, render.buffer,
+		sizeof(uint32_t) * render.surf_w * render.surf_h);
+	SDL_BlitScaled(render.tmpsurf, NULL, winsur, NULL);
 	SDL_UpdateWindowSurface(render.win);
 }
