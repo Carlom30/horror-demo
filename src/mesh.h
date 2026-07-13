@@ -25,4 +25,4 @@ typedef struct {
 triangle trimk(v3, v3, v3);
 rect find_triangle_box(triangle t);
 mesh mesh_cube(const v3 *pos);
-void mesh_render(const mesh *m, m4 view, m4 perspective);
+m4 mesh_transform(mesh m);

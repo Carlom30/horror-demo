@@ -2,6 +2,8 @@
 
 #include <stdlib.h>
 
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
+
 typedef struct {
 	int cnt;
 	int cap;
@@ -26,3 +28,4 @@ typedef struct {
 		(ptr)[h->cnt++] = item;						\
 	} while (0)
 #define DA_COUNT(ptr) (((header *)(ptr)) - 1)->cnt
+#define DA_FREE(ptr) free((((header *)(ptr)) - 1))

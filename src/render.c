@@ -8,6 +8,7 @@
 static struct {
 	SDL_Window *win;
 	uint32_t *buffer;
+	SDL_Surface *tmpsurf;
 	int win_w;
 	int win_h;
 	uint32_t color;
@@ -31,6 +32,8 @@ void render_getwh(int *w, int *h)
 	*h = render.win_h;
 }
 
+/* TODO: separate rendering surface from the window surface. This way, we can render less pixel and then
+   blit the smaller surface scaled to the real window */
 int render_init(int win_w, int win_h, const char *name)
 {
 	SDL_Init(SDL_INIT_VIDEO);
@@ -39,7 +42,11 @@ int render_init(int win_w, int win_h, const char *name)
 		SDL_WINDOWPOS_CENTERED,
 		SDL_WINDOWPOS_CENTERED,
 		win_w, win_h, 0);
-	render.buffer = malloc(sizeof(uint32_t) * win_w * win_h);
+	render.buffer = malloc(sizeof(uint32_t) * (win_w) * (win_h));
+	render.tmpsurf = SDL_CreateRGBSurfaceWithFormat(0,
+		win_w / 2, win_h / 2,
+		sizeof(uint32_t),
+		SDL_GetWindowSurface(render.win)->format->format);
 	render.win_w = win_w;
 	render.win_h = win_h;
 	render.color = SDL_MapRGBA(SDL_GetWindowSurface(render.win)->format,
@@ -91,7 +98,8 @@ void render_draw_point(int x, int y)
 }
 
 /* Bresenham algorithm */
-void render_plot_line(int x0, int y0, int x1, int y1) {
+void render_plot_line(int x0, int y0, int x1, int y1)
+{
 	int dx = abs(x1 - x0);
 	int sx = x0 < x1 ? 1 : -1;
 	int dy = -abs(y1 - y0);
@@ -116,8 +124,6 @@ void render_plot_line(int x0, int y0, int x1, int y1) {
 void render_clear()
 {
 	memset(render.buffer, 0, render.win_w * render.win_h * sizeof(uint32_t));
-	/* for (int i = 0; i < render.win_w * render.win_h; i++)
-	   render.buffer[i] = render.color; */
 }
 
 void render_update()
