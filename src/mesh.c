@@ -66,3 +66,22 @@ m4 mesh_transform(mesh m)
 	tr = m4mul(m4_translation(m.pos), tr);
 	return tr;
 }
+
+/* https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html */
+void raster_triangle(triangle t)
+{
+	rect r = find_triangle_box(t);
+	for (int y = r.y; y < r.y + r.h; y++) {
+		for (int x = r.x; x < r.x + r.w; x++) {
+			v3 p = v3mk(x, (float)y, 0);
+			float w0 = edge_function(t.p0, t.p1, p);
+			float w1 = edge_function(t.p1, t.p2, p);
+			float w2 = edge_function(t.p2, t.p0, p);
+			if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+				/* nice, point is inside the triangle */
+				render_set_color(255 * w0, 255 * w1, 255 * w2);
+				render_draw_point(x, y);
+			}
+		}
+	}
+}

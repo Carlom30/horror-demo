@@ -56,7 +56,6 @@ void mesh_project(const mesh *m, triangle **trisproj)
 	DA_ALLOC(*trisproj);
 	int ww, wh;
 	render_getwh(&ww, &wh);
-	float theta = m->theta;
 	m4 tr = mesh_transform(*m);
 	tr = m4mul(view, tr);
 	tr = m4mul(perspective, tr);
@@ -132,10 +131,10 @@ void loop_main()
 				v3 pp0 = t.p0;
 				v3 pp1 = t.p1;
 				v3 pp2 = t.p2;
-				render_plot_line(pp0.x, pp0.y, pp1.x, pp1.y);
-				render_plot_line(pp1.x, pp1.y, pp2.x, pp2.y);
-				render_plot_line(pp2.x, pp2.y, pp0.x, pp0.y);
-				rect r = find_triangle_box(t);
+				raster_triangle(trimk(pp0, pp1, pp2));
+				/* render_plot_line(pp0.x, pp0.y, pp1.x, pp1.y); */
+				/* render_plot_line(pp1.x, pp1.y, pp2.x, pp2.y); */
+				/* render_plot_line(pp2.x, pp2.y, pp0.x, pp0.y); */
 			}
 			m->theta += 1.0f * delta_time;
 		}
