@@ -8,6 +8,7 @@
 static struct {
 	SDL_Window *win;
 	uint32_t *buffer;
+	SDL_Surface *winsurf;
 	SDL_Surface *tmpsurf;
 	int win_w;
 	int win_h;
@@ -53,13 +54,26 @@ int render_init(int win_w, int win_h, const char *name)
 				0, 0, 0, 255);
 	SDL_SetRelativeMouseMode(SDL_TRUE);
 	SDL_WarpMouseInWindow(render.win, 0, 0);
+<<<<<<< Updated upstream
+=======
+
+	/* now the real rendering surface, which will be half of the window size */
+	render.surf_w = win_w / 2;
+	render.surf_h = win_h / 2;
+	render.buffer = malloc(sizeof(uint32_t) * (render.surf_w) * (render.surf_h));
+	render.tmpsurf = SDL_CreateRGBSurfaceWithFormat(0,
+		render.surf_w,
+		render.surf_h,
+		sizeof(uint32_t),
+		SDL_GetWindowSurface(render.win)->format->format);
+	render.winsurf = SDL_GetWindowSurface(render.win);
+>>>>>>> Stashed changes
 	return 0;
 }
 
 void render_set_color(uint8_t r, uint8_t g, uint8_t b)
 {
-	render.color = SDL_MapRGBA(SDL_GetWindowSurface(render.win)->format,
-				r, g, b, 255);
+	render.color = SDL_MapRGBA(render.winsurf->format, r, g, b, 255);
 }
 
 void render_draw_rect(const rect *r)
@@ -128,8 +142,15 @@ void render_clear()
 
 void render_update()
 {
+<<<<<<< Updated upstream
 	SDL_Surface *winsur = SDL_GetWindowSurface(render.win);
 	memcpy(winsur->pixels, render.buffer,
 		sizeof(uint32_t) * render.win_w * render.win_h);
+=======
+	SDL_Surface *winsur = render.winsurf;
+	memcpy(render.tmpsurf->pixels, render.buffer,
+		sizeof(uint32_t) * render.surf_w * render.surf_h);
+	SDL_BlitScaled(render.tmpsurf, NULL, winsur, NULL);
+>>>>>>> Stashed changes
 	SDL_UpdateWindowSurface(render.win);
 }

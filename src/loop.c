@@ -76,6 +76,11 @@ void mesh_project(const mesh *m, triangle **trisproj)
 	}
 }
 
+void scene_append_object(mesh obj)
+{
+	DA_APPEND(scene, obj);
+}
+
 void loop_main()
 {
 	int quit = 0;
@@ -122,12 +127,12 @@ void loop_main()
 		render_clear();
 		view = m4_camera_view(cam);
 		triangle *trisproj = NULL;
+		render_set_color(0, 200, 0);
 		for (int c = 0; c < DA_COUNT(scene); c++) {
 			mesh *m = &scene[c];
 			mesh_project((const mesh*)m, &trisproj);
 			for (int i = 0; i < DA_COUNT(trisproj); i++) {
 				triangle t = trisproj[i];
-				render_set_color(0, 200, 0);
 				v3 pp0 = t.p0;
 				v3 pp1 = t.p1;
 				v3 pp2 = t.p2;

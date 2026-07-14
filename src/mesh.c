@@ -1,6 +1,7 @@
 #include "mesh.h"
 
 #include <assert.h>
+#include <math.h>
 
 #include "render.h"
 
@@ -21,11 +22,11 @@ static float edge_function(v3 v0, v3 v1, v3 p)
 rect find_triangle_box(triangle t)
 {
 	rect r = {
-		.x = MIN(MIN(t.p0.x, t.p1.x), t.p2.x),
-		.y = MIN(MIN(t.p0.y, t.p1.y), t.p2.y),
+		.x = floorf(MIN(MIN(t.p0.x, t.p1.x), t.p2.x)),
+		.y = floorf(MIN(MIN(t.p0.y, t.p1.y), t.p2.y)),
 	};
-	r.w = MAX(MAX(t.p0.x, t.p1.x), t.p2.x) - r.x;
-	r.h = MAX(MAX(t.p0.y, t.p1.y), t.p2.y) - r.y;
+	r.w = ceilf(MAX(MAX(t.p0.x, t.p1.x), t.p2.x)) - r.x;
+	r.h = ceilf(MAX(MAX(t.p0.y, t.p1.y), t.p2.y)) - r.y;
 	return r;
 }
 
@@ -68,18 +69,28 @@ m4 mesh_transform(mesh m)
 }
 
 /* https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html */
+static int w, h;
+static int done = 0;
 void raster_triangle(triangle t)
 {
+	render_set_color(0, 200, 0);
 	rect r = find_triangle_box(t);
-	for (int y = r.y; y < r.y + r.h; y++) {
-		for (int x = r.x; x < r.x + r.w; x++) {
+	if (!done) {
+		done = 1;
+		render_getwh(&w, &h);
+	}
+	int x0 = MAX(r.x, 0);
+	int y0 = MAX(r.y, 0);
+	int x1 = MIN(r.x + r.w, w);
+	int y1 = MIN(r.y + r.h, h);
+	for (int y = y0; y < y1; y++) {
+		for (int x = x0; x < x1; x++) {
 			v3 p = v3mk(x, (float)y, 0);
 			float w0 = edge_function(t.p0, t.p1, p);
 			float w1 = edge_function(t.p1, t.p2, p);
 			float w2 = edge_function(t.p2, t.p0, p);
 			if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
 				/* nice, point is inside the triangle */
-				render_set_color(255 * w0, 255 * w1, 255 * w2);
 				render_draw_point(x, y);
 			}
 		}
