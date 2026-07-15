@@ -89,7 +89,7 @@ void raster_triangle(triangle t)
 			float w0 = edge_function(t.p0, t.p1, p);
 			float w1 = edge_function(t.p1, t.p2, p);
 			float w2 = edge_function(t.p2, t.p0, p);
-			if (w0 >= 0 && w1 >= 0 && w2 >= 0) {
+			if ((w0 >= 0 && w1 >= 0 && w2 >= 0)) {
 				/* nice, point is inside the triangle */
 				render_draw_point(x, y);
 			}
