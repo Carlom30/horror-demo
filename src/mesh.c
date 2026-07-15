@@ -85,7 +85,7 @@ void raster_triangle(triangle t)
 	int y1 = MIN(r.y + r.h, h);
 	for (int y = y0; y < y1; y++) {
 		for (int x = x0; x < x1; x++) {
-			v3 p = v3mk(x, (float)y, 0);
+			v3 p = v3mk((float)x + 0.5f, (float)y + 0.5f, 0);
 			float w0 = edge_function(t.p0, t.p1, p);
 			float w1 = edge_function(t.p1, t.p2, p);
 			float w2 = edge_function(t.p2, t.p0, p);
