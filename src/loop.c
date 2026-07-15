@@ -51,6 +51,11 @@ void loop_init()
 	cam = camera_init();
 }
 
+camera loop_get_camera()
+{
+	return cam;
+}
+
 void mesh_project(const mesh *m, triangle **trisproj)
 {
 	DA_ALLOC(*trisproj);
@@ -67,11 +72,18 @@ void mesh_project(const mesh *m, triangle **trisproj)
 		p0 = m4v4mul(tr, p0);
 		p1 = m4v4mul(tr, p1);
 		p2 = m4v4mul(tr, p2);
+		v3 norm = triangle_normal(trimk(
+			v4v3(p0),
+			v4v3(p1),
+			v4v3(p2))
+		);
 		if (p0.w <= 0.1f || p1.w <= 0.1f || p2.w <= 0.1f) continue;
 		v3 pp0 = (clip_to_scr(project(p0), ww, wh));
 		v3 pp1 = (clip_to_scr(project(p1), ww, wh));
 		v3 pp2 = (clip_to_scr(project(p2), ww, wh));
-		DA_APPEND(*trisproj, trimk(pp0, pp1, pp2));
+		triangle pjt = trimk(pp0, pp1, pp2);
+		pjt.norm = norm;
+		DA_APPEND(*trisproj, pjt);
 		/* render_draw_rect(&pr); */
 	}
 }
@@ -132,14 +144,7 @@ void loop_main()
 			mesh *m = &scene[c];
 			mesh_project((const mesh*)m, &trisproj);
 			for (int i = 0; i < DA_COUNT(trisproj); i++) {
-				triangle t = trisproj[i];
-				v3 pp0 = t.p0;
-				v3 pp1 = t.p1;
-				v3 pp2 = t.p2;
-				raster_triangle(trimk(pp0, pp1, pp2));
-				/* render_plot_line(pp0.x, pp0.y, pp1.x, pp1.y); */
-				/* render_plot_line(pp1.x, pp1.y, pp2.x, pp2.y); */
-				/* render_plot_line(pp2.x, pp2.y, pp0.x, pp0.y); */
+				raster_triangle(trisproj[i]);
 			}
 			m->theta += 1.0f * delta_time;
 		}

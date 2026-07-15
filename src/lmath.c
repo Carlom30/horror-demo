@@ -61,6 +61,11 @@ v3 v3_sum(v3 u, v3 v)
 	return v3mk(u.x + v.x, u.y + v.y, u.z + v.z);
 }
 
+v3 v3_sub(v3 u, v3 v)
+{
+	return v3mk(u.x - v.x, u.y - v.y, u.z - v.z);
+}
+
 v3 v3_times_scalar(v3 v, float f)
 {
 	return v3mk(v.x * f, v.y * f, v.z * f);

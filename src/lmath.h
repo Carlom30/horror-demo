@@ -51,6 +51,7 @@ v3 cross_product(v3, v3);
 float v3_magn(v3);
 v3 v3_norm(v3);
 v3 v3_sum(v3, v3);
+v3 v3_sub(v3, v3);
 v3 v3_times_scalar(v3, float);
 
 /* matrix */

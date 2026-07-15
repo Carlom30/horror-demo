@@ -2,7 +2,9 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdio.h>
 
+#include "loop.h"
 #include "render.h"
 
 triangle trimk(v3 p0, v3 p1, v3 p2)
@@ -64,8 +66,14 @@ mesh mesh_cube(const v3 *pos)
 m4 mesh_transform(mesh m)
 {
 	m4 tr = m4_rotation_y(m.theta);
+	tr = m4mul(m4_rotation_z(m.theta), tr);
 	tr = m4mul(m4_translation(m.pos), tr);
 	return tr;
+}
+
+v3 triangle_normal(triangle t)
+{
+	return v3_norm(cross_product(v3_sub(t.p2, t.p0), v3_sub(t.p1, t.p0)));
 }
 
 /* https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html */
@@ -73,7 +81,12 @@ static int w, h;
 static int done = 0;
 void raster_triangle(triangle t)
 {
-	render_set_color(0, 200, 0);
+	camera cam = loop_get_camera();
+	v3 ld = v3mk(0.0f, 0.0f, -1.0f);
+	float dp = t.norm.x * ld.x + t.norm.y * ld.y + t.norm.z * ld.z;
+	dp = CLAMP(dp, 0.0f, 1.0f);
+	float grey = CLAMP(200.0f * dp, 10.0f, 200.0f);
+	render_set_color(grey, grey, grey);
 	rect r = find_triangle_box(t);
 	if (!done) {
 		done = 1;
