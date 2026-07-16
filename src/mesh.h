@@ -27,4 +27,4 @@ rect find_triangle_box(triangle t);
 mesh mesh_cube(const v3 *pos);
 v3 triangle_normal(triangle t);
 m4 mesh_transform(mesh m);
-void raster_triangle(triangle t);
+

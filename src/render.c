@@ -5,10 +5,11 @@
 
 #include "lmath.h"
 
-#define SURFW 400
-#define SURFH 300
+#define SURFW 300
+#define SURFH 225
 
 static struct {
+	int init;
 	SDL_Window *win;
 	uint32_t *buffer;
 	SDL_Surface *winsurf;
@@ -18,7 +19,7 @@ static struct {
 	int win_w;
 	int win_h;
 	uint32_t color;
-} render;
+} render = {0};
 
 #define COORD_OUT_BUF_BOUND(x, y) ((x) < 0 || (x) >= render.surf_w || (y) < 0 || (y) >= render.surf_h)
 
@@ -34,6 +35,10 @@ void rect_print(rect r)
 
 void render_getwh(int *w, int *h)
 {
+	if (!render.init) {
+		printf("ERROR: render system was not initialized\n");
+		assert(0);
+	}
 	*w = render.surf_w;
 	*h = render.surf_h;
 }
@@ -69,6 +74,7 @@ int render_init(int win_w, int win_h, const char *name)
 		sizeof(uint32_t),
 		SDL_GetWindowSurface(render.win)->format->format);
 	render.winsurf = SDL_GetWindowSurface(render.win);
+	render.init = 1;
 	return 0;
 }
 

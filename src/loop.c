@@ -1,5 +1,7 @@
 #include "loop.h"
 
+#include <assert.h>
+#include <limits.h>
 #include "../libs/SDL2/include/SDL2/SDL.h"
 #include "../libs/SDL2/include/SDL2/SDL_timer.h"
 
@@ -13,6 +15,7 @@ static float delta_time = 0.0f;
 static camera cam;
 static m4 perspective;
 static m4 view;
+static float *zbuffer = NULL;
 
 /* TODO: move this in a input manager system */
 static SDL_Event e;
@@ -49,6 +52,9 @@ void loop_init()
 	v3 p = v3mk(0.0f, 0.0f, 2.0f);
 	DA_APPEND(scene, mesh_cube(&p));
 	cam = camera_init();
+	int w, h;
+	render_getwh(&w, &h);
+	zbuffer = calloc(w * h, sizeof(float));
 }
 
 camera loop_get_camera()
@@ -56,9 +62,64 @@ camera loop_get_camera()
 	return cam;
 }
 
-void mesh_project(const mesh *m, triangle **trisproj)
+static float edge_function(v3 v0, v3 v1, v3 p)
 {
-	DA_ALLOC(*trisproj);
+	/* just the magnitude of the cross product between (v0 - v1) and (p - v0)
+	   or the determinant of the matrix describing the (v0 - v1) and (p - v0) vector space.
+	   If this value is negative, then the point p is "on the left" of the edge, meaning is outside
+	   of the triangle */
+	return (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y ) * (v1.x - v0.x);
+}
+
+/* https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html */
+static int w, h;
+static int done = 0;
+static void raster_triangle(triangle t)
+{
+	if (!done) {
+		done = 1;
+		render_getwh(&w, &h);
+	}
+	camera cam = loop_get_camera();
+	v3 ld = v3mk(0.0f, 0.0f, -1.0f);
+	float dp = t.norm.x * ld.x + t.norm.y * ld.y + t.norm.z * ld.z;
+	dp = CLAMP(dp, 0.0f, 1.0f);
+	float grey = CLAMP(200.0f * dp, 10.0f, 200.0f);
+	render_set_color(grey, grey, grey);
+	rect r = find_triangle_box(t);
+	int x0 = MAX(r.x, 0);
+	int y0 = MAX(r.y, 0);
+	int x1 = MIN(r.x + r.w, w);
+	int y1 = MIN(r.y + r.h, h);
+	for (int y = y0; y < y1; y++) {
+		for (int x = x0; x < x1; x++) {
+			v3 p = v3mk((float)x + 0.5f, (float)y + 0.5f, 0);
+			float w0 = edge_function(t.p0, t.p1, p);
+			float w1 = edge_function(t.p1, t.p2, p);
+			float w2 = edge_function(t.p2, t.p0, p);
+			if ((w0 >= 0 && w1 >= 0 && w2 >= 0)) {
+				/* nice, point is inside the triangle */
+				/* now let's see if there is a nearer pixel there */
+				float z = w0 * t.p0.z + w1 * t.p0.z + w2 * t.p0.z;
+				if (zbuffer[y * w + x] > z) {
+					/* ok, this pixel must be rendered */
+					zbuffer[y * w + x] = z;
+					render_draw_point(x, y);
+				}
+			}
+		}
+	}
+}
+
+static void tris_raster(triangle *tris)
+{
+	assert(tris);
+	for (int i = 0; i < DA_COUNT(tris); i++)
+		raster_triangle(tris[i]);
+}
+
+static void mesh_project(const mesh *m, triangle **trisproj)
+{
 	int ww, wh;
 	render_getwh(&ww, &wh);
 	m4 tr = mesh_transform(*m);
@@ -72,12 +133,13 @@ void mesh_project(const mesh *m, triangle **trisproj)
 		p0 = m4v4mul(tr, p0);
 		p1 = m4v4mul(tr, p1);
 		p2 = m4v4mul(tr, p2);
+		if (p0.w <= 0.1f || p1.w <= 0.1f || p2.w <= 0.1f)
+			continue;
 		v3 norm = triangle_normal(trimk(
 			v4v3(p0),
 			v4v3(p1),
 			v4v3(p2))
 		);
-		if (p0.w <= 0.1f || p1.w <= 0.1f || p2.w <= 0.1f) continue;
 		v3 pp0 = (clip_to_scr(project(p0), ww, wh));
 		v3 pp1 = (clip_to_scr(project(p1), ww, wh));
 		v3 pp2 = (clip_to_scr(project(p2), ww, wh));
@@ -137,16 +199,19 @@ void loop_main()
 		}
 		camera_rotate(&cam, 0.005f);
 		render_clear();
+		for (int i = 0; i < wh; i++)
+			for (int j = 0; j < ww; j++)
+				zbuffer[i * ww + j] = FLT_MAX;
 		view = m4_camera_view(cam);
 		triangle *trisproj = NULL;
 		render_set_color(0, 200, 0);
 		for (int c = 0; c < DA_COUNT(scene); c++) {
 			mesh *m = &scene[c];
+			DA_ALLOC(trisproj);
 			mesh_project((const mesh*)m, &trisproj);
-			for (int i = 0; i < DA_COUNT(trisproj); i++) {
-				raster_triangle(trisproj[i]);
-			}
+			tris_raster(trisproj);
 			m->theta += 1.0f * delta_time;
+			DA_FREE(trisproj);
 		}
 		render_update();
 	}

@@ -1,3 +1,6 @@
+#include <time.h>
+#include <stdlib.h>
+
 #include "lmath.h"
 #include "render.h"
 #include "loop.h"
@@ -5,8 +8,9 @@
 
 int main(void)
 {
-	int ww = 1280;
-	int wh = 960;
+	srand(time(NULL));
+	int ww = 800;
+	int wh = 600;
 	render_init(ww, wh, "game");
 	loop_init();
 	for (int i = 0; i < 10; i++) {
