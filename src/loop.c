@@ -64,10 +64,6 @@ camera loop_get_camera()
 
 static float edge_function(v3 v0, v3 v1, v3 p)
 {
-	/* just the magnitude of the cross product between (v0 - v1) and (p - v0)
-	   or the determinant of the matrix describing the (v0 - v1) and (p - v0) vector space.
-	   If this value is negative, then the point p is "on the left" of the edge, meaning is outside
-	   of the triangle */
 	return (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y ) * (v1.x - v0.x);
 }
 
@@ -91,18 +87,21 @@ static void raster_triangle(triangle t)
 	int y0 = MAX(r.y, 0);
 	int x1 = MIN(r.x + r.w, w);
 	int y1 = MIN(r.y + r.h, h);
+	float tarea2 = 2.0f * triangle_area(t);
+	if (tarea2 <= 0)
+		return; /* this triangle is internal to the mesh, dont care */
 	for (int y = y0; y < y1; y++) {
 		for (int x = x0; x < x1; x++) {
 			v3 p = v3mk((float)x + 0.5f, (float)y + 0.5f, 0);
 			float w0 = edge_function(t.p0, t.p1, p);
 			float w1 = edge_function(t.p1, t.p2, p);
 			float w2 = edge_function(t.p2, t.p0, p);
+			w0 /= tarea2;
+			w1 /= tarea2;
+			w2 /= tarea2;
 			if ((w0 >= 0 && w1 >= 0 && w2 >= 0)) {
-				/* nice, point is inside the triangle */
-				/* now let's see if there is a nearer pixel there */
-				float z = w0 * t.p0.z + w1 * t.p0.z + w2 * t.p0.z;
+				float z = w0 * t.p2.z + w1 * t.p0.z + w2 * t.p1.z;
 				if (zbuffer[y * w + x] > z) {
-					/* ok, this pixel must be rendered */
 					zbuffer[y * w + x] = z;
 					render_draw_point(x, y);
 				}
@@ -217,3 +216,4 @@ void loop_main()
 	}
 	return;
 }
+

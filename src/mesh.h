@@ -26,5 +26,6 @@ triangle trimk(v3, v3, v3);
 rect find_triangle_box(triangle t);
 mesh mesh_cube(const v3 *pos);
 v3 triangle_normal(triangle t);
+float triangle_area(triangle t);
 m4 mesh_transform(mesh m);
 

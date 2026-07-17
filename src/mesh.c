@@ -67,3 +67,9 @@ v3 triangle_normal(triangle t)
 {
 	return v3_norm(cross_product(v3_sub(t.p2, t.p0), v3_sub(t.p1, t.p0)));
 }
+
+float triangle_area(triangle t)
+{
+	return 0.5f * ((t.p2.x - t.p0.x) * (t.p1.y - t.p0.y) - (t.p2.y - t.p0.y) * (t.p1.x - t.p0.x));
+}
+
