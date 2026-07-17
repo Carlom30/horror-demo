@@ -1,1 +1,1 @@
-LD_LIBRARY_PATH=./libs/SDL2/lib/ ./game
+LD_LIBRARY_PATH=./libs/SDL2/ ./game

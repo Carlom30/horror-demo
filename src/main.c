@@ -6,14 +6,18 @@
 #include "render.h"
 #include "loop.h"
 #include "mesh.h"
+#include "utils.h"
 
 int main(void)
 {
+	char *cube = NULL;
+	read_file_str("assets/cube.obj", &cube);
+	printf("%s\n", cube);
 	int ww = 800;
 	int wh = 600;
 	render_init(ww, wh, "The Dolphin Hotel");
 	loop_init();
-	for (int i = 0; i < 0; i++) {
+	for (int i = 0; i < 5; i++) {
 		v3 rp = v3mk(rand() % 20, rand() % 20, rand() % 20);
 		scene_append_object(mesh_cube(&rp));
 	}

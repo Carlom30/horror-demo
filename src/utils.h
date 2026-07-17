@@ -1,9 +1,17 @@
 #pragma once
 
 #include <stdlib.h>
+#include <assert.h>
 
 #define ERR -1
 #define NOERR 0
+
+#define ERROR(...)					\
+	do {						\
+		fprintf(stderr, "ERROR: "__VA_ARGS__);	\
+		fflush(stdout);			\
+		assert(0);				\
+	} while (0)
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
@@ -33,5 +41,5 @@ typedef struct {
 #define DA_COUNT(ptr) (((header *)(ptr)) - 1)->cnt
 #define DA_FREE(ptr) free((((header *)(ptr)) - 1))
 
-int load_file_str(const char *path);
+int read_file_str(const char *path, char **dst);
 

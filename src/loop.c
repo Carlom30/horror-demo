@@ -76,7 +76,9 @@ static void raster_triangle(triangle t)
 		done = 1;
 		render_getwh(&w, &h);
 	}
-	camera cam = loop_get_camera();
+	float tarea2 = 2.0f * triangle_area(t);
+	if (tarea2 <= 0)
+		return; /* this triangle is internal to the mesh, dont care */
 	v3 ld = v3mk(0.0f, 0.0f, -1.0f);
 	float dp = t.norm.x * ld.x + t.norm.y * ld.y + t.norm.z * ld.z;
 	dp = CLAMP(dp, 0.0f, 1.0f);
@@ -87,9 +89,6 @@ static void raster_triangle(triangle t)
 	int y0 = MAX(r.y, 0);
 	int x1 = MIN(r.x + r.w, w);
 	int y1 = MIN(r.y + r.h, h);
-	float tarea2 = 2.0f * triangle_area(t);
-	if (tarea2 <= 0)
-		return; /* this triangle is internal to the mesh, dont care */
 	for (int y = y0; y < y1; y++) {
 		for (int x = x0; x < x1; x++) {
 			v3 p = v3mk((float)x + 0.5f, (float)y + 0.5f, 0);
