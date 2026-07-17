@@ -1,6 +1,6 @@
 CC=cc
 CFLAGS += -Wall -Wno-missing-braces
-LIBPATH=./libs/SDL2/lib/
+LIBPATH=./libs/SDL2/
 CPATH=-I./libs/SDL2/include/
 LDPATH=-L$(LIBPATH)
 LIBS= -lSDL2 -lm #-l:libSDL2.a
