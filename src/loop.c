@@ -92,19 +92,23 @@ static void raster_triangle(triangle t)
 	for (int y = y0; y < y1; y++) {
 		for (int x = x0; x < x1; x++) {
 			v3 p = v3mk((float)x + 0.5f, (float)y + 0.5f, 0);
-			float w0 = edge_function(t.p0, t.p1, p);
-			float w1 = edge_function(t.p1, t.p2, p);
-			float w2 = edge_function(t.p2, t.p0, p);
-			w0 /= tarea2;
-			w1 /= tarea2;
-			w2 /= tarea2;
-			if ((w0 >= 0 && w1 >= 0 && w2 >= 0)) {
-				float z = w0 * t.p2.z + w1 * t.p0.z + w2 * t.p1.z;
-				if (zbuffer[y * w + x] > z) {
-					zbuffer[y * w + x] = z;
-					render_draw_point(x, y);
-				}
-			}
+			float ep02 = edge_function(t.p0, t.p2, p);
+			float ep21 = edge_function(t.p2, t.p1, p);
+			float ep10 = edge_function(t.p1, t.p0, p);
+
+			/* barycentric coordinates */
+			float area2 = 2 * triangle_area(t);
+			float w0 = ep21 / area2;
+			float w1 = ep02 / area2;
+			float w2 = 1.0f - (w0 + w1);
+
+			if (w0 < 0 || w1 < 0 || w2 < 0) continue;
+
+			float z = w0 * t.p0.z + w1 * t.p1.z + w2 * t.p2.z;
+			if (z >= zbuffer[y * w + x]) continue;
+
+			zbuffer[y * w + x] = z;
+			render_draw_point(x, y);
 		}
 	}
 }
@@ -208,7 +212,7 @@ void loop_main()
 			DA_ALLOC(trisproj);
 			mesh_project((const mesh*)m, &trisproj);
 			tris_raster(trisproj);
-			m->theta += 1.0f * delta_time;
+			m->theta += 0.0f * delta_time;
 			DA_FREE(trisproj);
 		}
 		render_update();

@@ -26,10 +26,16 @@ rect find_triangle_box(triangle t)
 m4 mesh_transform(mesh m)
 {
 	m4 tr = m4_rotation_y(m.theta);
-	tr = m4mul(m4_rotation_z(m.theta), tr);
-	tr = m4mul(m4_rotation_x(m.theta), tr);
+	tr = m4mul(m4_rotation_y(m.theta), tr);
 	tr = m4mul(m4_translation(m.pos), tr);
 	return tr;
+}
+
+mesh mesh_init()
+{
+	mesh m = {0};
+	DA_ALLOC(m.tris);
+	return m;
 }
 
 mesh mesh_cube(const v3 *pos)
@@ -65,11 +71,11 @@ mesh mesh_cube(const v3 *pos)
 
 v3 triangle_normal(triangle t)
 {
-	return v3_norm(cross_product(v3_sub(t.p2, t.p0), v3_sub(t.p1, t.p0)));
+	return v3_norm(cross_product(v3_sub(t.p1, t.p0), v3_sub(t.p2, t.p0)));
 }
 
 float triangle_area(triangle t)
 {
-	return 0.5f * ((t.p2.x - t.p0.x) * (t.p1.y - t.p0.y) - (t.p2.y - t.p0.y) * (t.p1.x - t.p0.x));
+	return 0.5f * ((t.p1.x - t.p0.x) * (t.p2.y - t.p0.y) - (t.p2.x - t.p0.x) * (t.p1.y - t.p0.y));
 }
 

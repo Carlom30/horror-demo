@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
@@ -39,6 +40,7 @@ typedef struct {
 		(ptr)[h->cnt++] = item;						\
 	} while (0)
 #define DA_COUNT(ptr) (((header *)(ptr)) - 1)->cnt
+#define DA_LAST(ptr) (ptr)[((((header *)(ptr)) - 1)->cnt - 1)]
 #define DA_FREE(ptr) free((((header *)(ptr)) - 1))
 
 int read_file_str(const char *path, char **dst);

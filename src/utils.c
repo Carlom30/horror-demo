@@ -4,13 +4,42 @@
 
 int read_file_str(const char *path, char **dst)
 {
-	FILE *fd = fopen(path, "r");
-	fseek(fd, 0, SEEK_END);
-	int len = ftell(fd);
+	if (!path || !dst) return ERR;
+
+	*dst = NULL;
+
+	FILE *fd = fopen(path, "rb");
+	if (!fd) return ERR;
+
+	if (fseek(fd, 0, SEEK_END) != 0) {
+		fclose(fd);
+		return ERR;
+	}
+
+	long pos = ftell(fd);
+	if (pos < 0) {
+		fclose(fd);
+		return ERR;
+	}
 	rewind(fd);
-	(*dst) = malloc(len + 1);
-	fread(*dst, 1, len, fd);
-	(*dst)[len] = '\0';
+	size_t len = (size_t)pos;
+
+	char *buf = (char *)malloc(len + 1);
+	if (!buf) {
+		fclose(fd);
+		return ERR;
+	}
+
+	size_t nread = fread(buf, 1, len, fd);
+	if (nread != len) {
+		free(buf);
+		fclose(fd);
+		return ERR;
+	}
+
+	buf[len] = '\0';
+
 	fclose(fd);
+	*dst = buf;
 	return NOERR;
 }
