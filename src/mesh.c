@@ -6,6 +6,9 @@
 
 #include "loop.h"
 #include "render.h"
+#include "obj.h"
+
+static DA(mesh) loaded_meshes;
 
 triangle trimk(v3 p0, v3 p1, v3 p2)
 {
@@ -28,12 +31,35 @@ m4 mesh_transform(mesh m)
 	m4 tr = m4_rotation_y(m.theta);
 	tr = m4mul(m4_rotation_y(m.theta), tr);
 	tr = m4mul(m4_translation(m.pos), tr);
+	tr = m4mul(m4_scale(m.scale), tr);
 	return tr;
 }
 
-mesh mesh_init()
+void mesh_load_all(void)
+{
+	/* this will, for now, load evey mesh into an array.
+	   But i have questions:
+	   0) should this be an hashmap?
+	   1) should i really load evey mesh into the memory? */
+	DA_ALLOC(loaded_meshes);
+	mesh m = {0};
+	obj_load_mesh("assets/cube.obj", &m);
+	DA_APPEND(loaded_meshes, m);
+	obj_load_mesh("assets/icosphere.obj", &m);
+	DA_APPEND(loaded_meshes, m);
+	obj_load_mesh("assets/cow.obj", &m);
+	DA_APPEND(loaded_meshes, m);
+}
+
+mesh mesh_get_by_name(enum mesh_name name)
+{
+	return loaded_meshes[name];
+}
+
+mesh mesh_alloc()
 {
 	mesh m = {0};
+	m.scale = v3mk(1.0f, 1.0f, 1.0f);
 	DA_ALLOC(m.tris);
 	return m;
 }

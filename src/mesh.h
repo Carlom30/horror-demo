@@ -20,11 +20,21 @@ typedef struct {
 	DA(triangle) tris;
 	float theta; /* TODO implement axis rotation */
 	v3 pos;
+	v3 scale;
 } mesh;
+
+enum mesh_name {
+	MN_CUBE = 0,
+	MN_ICOSPHERE = 1,
+	MN_COW = 2,
+	MN_CNT
+};
 
 triangle trimk(v3, v3, v3);
 rect find_triangle_box(triangle t);
-mesh mesh_init();
+mesh mesh_alloc(void);
+void mesh_load_all(void);
+mesh mesh_get_by_name(enum mesh_name name);
 mesh mesh_cube(const v3 *pos);
 v3 triangle_normal(triangle t);
 float triangle_area(triangle t);

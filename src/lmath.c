@@ -135,6 +135,16 @@ m4 m4_translation(v3 t)
 		}};
 }
 
+m4 m4_scale(v3 s)
+{
+	return (m4){{
+			s.x,  0.0f, 0.0f, 0.0f,
+			0.0f, s.y,  0.0f, 0.0f,
+			0.0f, 0.0f, s.z,  0.0f,
+			0.0f, 0.0f, 0.0f, 1.0f
+		}};
+}
+
 v4 m4v4mul(m4 m, v4 v)
 {
 	v4 mv = {0};

@@ -49,8 +49,11 @@ void camera_rotate(camera *cam, float speed)
 void loop_init()
 {
 	DA_ALLOC(scene);
-	v3 p = v3mk(0.0f, 0.0f, 2.0f);
-	DA_APPEND(scene, mesh_cube(&p));
+	mesh_load_all();
+	v3 p = v3mk(0.0f, 0.0f, 4.0f);
+	mesh m = mesh_get_by_name(MN_COW);
+	m.pos = p;
+	DA_APPEND(scene, m);
 	cam = camera_init();
 	int w, h;
 	render_getwh(&w, &h);
@@ -100,7 +103,7 @@ static void raster_triangle(triangle t)
 			float area2 = 2 * triangle_area(t);
 			float w0 = ep21 / area2;
 			float w1 = ep02 / area2;
-			float w2 = 1.0f - (w0 + w1);
+			float w2 = ep10 / area2; /* 1.0f - (w0 + w1); */
 
 			if (w0 < 0 || w1 < 0 || w2 < 0) continue;
 
@@ -124,17 +127,18 @@ static void mesh_project(const mesh *m, triangle **trisproj)
 {
 	int ww, wh;
 	render_getwh(&ww, &wh);
-	m4 tr = mesh_transform(*m);
-	tr = m4mul(view, tr);
-	tr = m4mul(perspective, tr);
+	m4 mvp = mesh_transform(*m);
+	/* m4 tr = mvp; */
+	mvp = m4mul(view, mvp);
+	mvp = m4mul(perspective, mvp);
 	for (int i = 0; i < DA_COUNT(m->tris); i++) {
 		triangle tri = m->tris[i];
 		v4 p0 = v3v4(tri.p0);
 		v4 p1 = v3v4(tri.p1);
 		v4 p2 = v3v4(tri.p2);
-		p0 = m4v4mul(tr, p0);
-		p1 = m4v4mul(tr, p1);
-		p2 = m4v4mul(tr, p2);
+		p0 = m4v4mul(mvp, p0);
+		p1 = m4v4mul(mvp, p1);
+		p2 = m4v4mul(mvp, p2);
 		if (p0.w <= 0.1f || p1.w <= 0.1f || p2.w <= 0.1f)
 			continue;
 		v3 norm = triangle_normal(trimk(
@@ -212,7 +216,7 @@ void loop_main()
 			DA_ALLOC(trisproj);
 			mesh_project((const mesh*)m, &trisproj);
 			tris_raster(trisproj);
-			m->theta += 0.0f * delta_time;
+			m->theta += 1.0f * delta_time;
 			DA_FREE(trisproj);
 		}
 		render_update();

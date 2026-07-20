@@ -17,7 +17,7 @@ static v3 consume_vertex(const char *src, int *cursor)
 		ERROR("obj_load_file file has broken vertex (char: %c)\n", c);
 	}
 	/* here we are sure the next number is a value */
-	char *tmpsrc = src + tmpc;
+	char *tmpsrc = (char *)src + tmpc;
 	v.x = strtod(tmpsrc, &tmpsrc);
 	tmpsrc++;
 	v.y = strtod(tmpsrc, &tmpsrc);
@@ -37,7 +37,7 @@ static void consume_tri_idxs(const char *src, int *cursor, int **dst)
 		ERROR("obj_load_file file has broken indices (char: %c)\n", c);
 	}
 	/* here we are sure the next number is a value */
-	char *tmpsrc = src + tmpc;
+	char *tmpsrc = (char *)src + tmpc;
 	DA_APPEND(*dst, strtol(tmpsrc, &tmpsrc, 0));
 	tmpsrc++;
 	DA_APPEND(*dst, strtol(tmpsrc, &tmpsrc, 0));
@@ -78,7 +78,7 @@ int obj_load_mesh(const char *path, mesh *dst)
 		cursor++;
 	}
 	/* last, build the mesh */
-	mesh m = mesh_init();
+	mesh m = mesh_alloc();
 	for (int i = 0; i < DA_COUNT(idxs); i += 3) {
 		triangle t = {0};
 		t.p0 = verts[idxs[i + 0] - 1];

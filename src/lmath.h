@@ -63,6 +63,7 @@ m4 m4_rotation_x(float theta);
 m4 m4_rotation_y(float theta);
 m4 m4_rotation_z(float theta);
 m4 m4_translation(v3);
+m4 m4_scale(v3 s);
 
 /* projection stuff */
 m4 m4_perspective(float near, float far, float ratio, float fov);
