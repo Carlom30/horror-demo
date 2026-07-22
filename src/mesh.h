@@ -14,6 +14,9 @@ typedef struct {
 		};
 	};
 	v3 norm;
+	v3 p0col;
+	v3 p1col;
+	v3 p2col;
 } triangle;
 
 typedef struct {
@@ -24,9 +27,11 @@ typedef struct {
 } mesh;
 
 enum mesh_name {
-	MN_CUBE = 0,
+	MN_CUBE      = 0,
 	MN_ICOSPHERE = 1,
-	MN_COW = 2,
+	MN_COW       = 2,
+	MN_AL        = 3,
+	MN_PENG      = 4,
 	MN_CNT
 };
 

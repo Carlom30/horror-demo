@@ -49,6 +49,10 @@ void mesh_load_all(void)
 	DA_APPEND(loaded_meshes, m);
 	obj_load_mesh("assets/cow.obj", &m);
 	DA_APPEND(loaded_meshes, m);
+	obj_load_mesh("assets/al.obj", &m);
+	DA_APPEND(loaded_meshes, m);
+	obj_load_mesh("assets/peng/PenguinBaseMesh.obj", &m);
+	DA_APPEND(loaded_meshes, m);
 }
 
 mesh mesh_get_by_name(enum mesh_name name)

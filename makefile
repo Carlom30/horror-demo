@@ -10,25 +10,28 @@ DEPS=src/lmath.h src/render.h src/mesh.h src/loop.h src/utils.h src/obj.h
 EXENAME=game
 RUNNAME=run
 TARGETDIR=target
+
 .PHONY = release sanit
 
 $(EXENAME): $(SRC)
+	make runscr
 	$(CC) -o $@ $^ $(CPATH) $(LDPATH) $(LIBS) $(CFLAGS)
 
 sanit: CFLAGS += -fsanitize=address
-sanit: $(EXENAME)
+sanit: clean $(EXENAME)
 
 run: $(EXENAME) runscr
 	./$@.sh
 
 clean:
-	rm game
-	rm $(RUNNAME).sh
+	@if [ -f $(EXENAME) ]; then rm $(EXENAME); echo "removing $(EXENAME)"; \
+		else echo "$(EXENAME) not removed, no such file"; fi;
+	@if [ -f $(RUNNAME).sh ]; then rm $(RUNNAME).sh; echo "removing $(RUNNAME).sh"; \
+		else echo "$(RUNNAME).sh not removed, no such file"; fi;
 
-# should also copy libs on target dir, for now ill just ".."
 release: CFLAGS += -O3
-release: $(EXENAME)
-	if [ ! -d "$(TARGETDIR)" ]; then mkdir $(TARGETDIR); fi
+release: clean $(EXENAME)
+	@if [ ! -d "$(TARGETDIR)" ]; then mkdir $(TARGETDIR); fi
 	make runscr && mv $(RUNNAME).sh $(TARGETDIR)/ && \
 		cp -r libs/ $(TARGETDIR)/
 		cp -r assets/ $(TARGETDIR)/
@@ -36,7 +39,10 @@ release: $(EXENAME)
 	mv $(EXENAME) $(TARGETDIR)/
 
 runscr:
-	if [ ! -f "$(RUNNAME).sh" ]; then \
+	@if [ ! -f "$(RUNNAME).sh" ]; then \
 		echo "LD_LIBRARY_PATH=$(LIBPATH) ./$(EXENAME)" > $(RUNNAME).sh \
 		; fi
-	chmod +x $(RUNNAME).sh
+	@chmod +x $(RUNNAME).sh
+
+clang: CC=clang
+clang: $(EXENAME)

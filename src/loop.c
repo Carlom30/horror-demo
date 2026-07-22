@@ -50,8 +50,13 @@ void loop_init()
 {
 	DA_ALLOC(scene);
 	mesh_load_all();
-	v3 p = v3mk(0.0f, 0.0f, 4.0f);
-	mesh m = mesh_get_by_name(MN_COW);
+	v3 p = v3mk(0.0f, 0.0f, 10.0f);
+	mesh m = mesh_get_by_name(MN_PENG);
+	for (int i = 0; i < DA_COUNT(m.tris); i++) {
+		m.tris[i].p0col = v3mk(255, 255, 255);
+		m.tris[i].p1col = v3mk(255, 255, 255);
+		m.tris[i].p2col = v3mk(255, 255, 255);
+	}
 	m.pos = p;
 	DA_APPEND(scene, m);
 	cam = camera_init();
@@ -82,11 +87,11 @@ static void raster_triangle(triangle t)
 	float tarea2 = 2.0f * triangle_area(t);
 	if (tarea2 <= 0)
 		return; /* this triangle is internal to the mesh, dont care */
+	/* if (t.p0.z >= 1.0f || t.p1.z >= 1.0f || t.p2.z >= 1.0f) */
+	/* 	return; */
 	v3 ld = v3mk(0.0f, 0.0f, -1.0f);
 	float dp = t.norm.x * ld.x + t.norm.y * ld.y + t.norm.z * ld.z;
 	dp = CLAMP(dp, 0.0f, 1.0f);
-	float grey = CLAMP(200.0f * dp, 10.0f, 200.0f);
-	render_set_color(grey, grey, grey);
 	rect r = find_triangle_box(t);
 	int x0 = MAX(r.x, 0);
 	int y0 = MAX(r.y, 0);
@@ -109,8 +114,14 @@ static void raster_triangle(triangle t)
 
 			float z = w0 * t.p0.z + w1 * t.p1.z + w2 * t.p2.z;
 			if (z >= zbuffer[y * w + x]) continue;
-
+			if (z > 1.0f) continue;
 			zbuffer[y * w + x] = z;
+
+			v3 c0 = v3_mul_f(t.p0col, w0);
+			v3 c1 = v3_mul_f(t.p1col, w1);
+			v3 c2 = v3_mul_f(t.p2col, w2);
+			v3 cf = v3_sum(v3_sum(c0, c1), c2);
+			render_set_color(cf.x * dp, cf.y * dp, cf.z * dp);
 			render_draw_point(x, y);
 		}
 	}
@@ -149,10 +160,12 @@ static void mesh_project(const mesh *m, triangle **trisproj)
 		v3 pp0 = (clip_to_scr(project(p0), ww, wh));
 		v3 pp1 = (clip_to_scr(project(p1), ww, wh));
 		v3 pp2 = (clip_to_scr(project(p2), ww, wh));
-		triangle pjt = trimk(pp0, pp1, pp2);
+		triangle pjt = tri;
+		pjt.p0 = pp0;
+		pjt.p1 = pp1;
+		pjt.p2 = pp2;
 		pjt.norm = norm;
 		DA_APPEND(*trisproj, pjt);
-		/* render_draw_rect(&pr); */
 	}
 }
 
@@ -170,7 +183,7 @@ void loop_main()
 	float one = 0;
 	int ww, wh;
 	render_getwh(&ww, &wh);
-	perspective = m4_perspective(0.1f, 100.0f, (float)wh / (float)ww, M_PI / 4.0f);
+	perspective = m4_perspective(0.1f, 50.0f, (float)wh / (float)ww, M_PI / 4.0f);
 	while (!quit) {
 		/* TODO input system */
 		SDL_PumpEvents();
@@ -192,16 +205,16 @@ void loop_main()
 		/* TODO: Input system */
 		const uint8_t *state = SDL_GetKeyboardState(NULL);
 		if (state[SDL_SCANCODE_W]) {
-			cam.pos = v3_sum(cam.pos, v3_times_scalar(cam.dir, 10.0f * delta_time));
+			cam.pos = v3_sum(cam.pos, v3_mul_f(cam.dir, 10.0f * delta_time));
 		}
 		if (state[SDL_SCANCODE_S]) {
-			cam.pos = v3_sum(cam.pos, v3_times_scalar(cam.dir, -10.0f * delta_time));
+			cam.pos = v3_sum(cam.pos, v3_mul_f(cam.dir, -10.0f * delta_time));
 		}
 		if (state[SDL_SCANCODE_A]) {
-			cam.pos = v3_sum(cam.pos, v3_times_scalar(v3_norm(cross_product(v3mk(0.0f, 1.0f, 0.0f), cam.dir)), -delta_time * 2.0f));
+			cam.pos = v3_sum(cam.pos, v3_mul_f(v3_norm(cross_product(v3mk(0.0f, 1.0f, 0.0f), cam.dir)), -delta_time * 2.0f));
 		}
 		if (state[SDL_SCANCODE_D]) {
-			cam.pos = v3_sum(cam.pos, v3_times_scalar(v3_norm(cross_product(v3mk(0.0f, 1.0f, 0.0f), cam.dir)), delta_time * 2.0f));
+			cam.pos = v3_sum(cam.pos, v3_mul_f(v3_norm(cross_product(v3mk(0.0f, 1.0f, 0.0f), cam.dir)), delta_time * 2.0f));
 		}
 		camera_rotate(&cam, 0.005f);
 		render_clear();
@@ -212,12 +225,12 @@ void loop_main()
 		triangle *trisproj = NULL;
 		render_set_color(0, 200, 0);
 		for (int c = 0; c < DA_COUNT(scene); c++) {
-			mesh *m = &scene[c];
 			DA_ALLOC(trisproj);
+			mesh *m = &scene[c];
 			mesh_project((const mesh*)m, &trisproj);
 			tris_raster(trisproj);
-			m->theta += 1.0f * delta_time;
 			DA_FREE(trisproj);
+			m->theta += 0.3f * delta_time;
 		}
 		render_update();
 	}

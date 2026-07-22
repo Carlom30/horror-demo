@@ -66,9 +66,14 @@ v3 v3_sub(v3 u, v3 v)
 	return v3mk(u.x - v.x, u.y - v.y, u.z - v.z);
 }
 
-v3 v3_times_scalar(v3 v, float f)
+float v3_dot(v3 v, v3 u)
 {
-	return v3mk(v.x * f, v.y * f, v.z * f);
+	return (v.x * u.x + v.y * u.y + v.z * u.z);
+}
+
+v3 v3_mul_f(v3 v, float f)
+{
+	return (v3){{ v.x * f, v.y * f, v.z * f }};
 }
 
 m4 m4_identity()
@@ -187,7 +192,7 @@ m4 m4muls(m4 *ms, int mscnt)
 	 */
 	assert((mscnt >= 2) && "error: tried to multiply less then 2 matrices");
 	m4 m = ms[mscnt - 1];
-	for (int i = mscnt - 2; i <= 0; mscnt--) {
+	for (int i = mscnt - 2; i <= 0; i--) {
 		m = m4mul(ms[i], m);
 	}
 	return m;
