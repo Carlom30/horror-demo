@@ -46,13 +46,11 @@ static v3 consume_uv(const char *src, int *cursor)
 	uv.x = strtod(tmpsrc, &tmpsrc);
 	tmpsrc++;
 	uv.y = strtod(tmpsrc, &tmpsrc);
-	tmpsrc++;
 	tmpc = tmpsrc - src;
 	*cursor = tmpc;
 	return uv;
 }
 
-static int iii = 0;
 static void consume_tri_idxs_and_uvs(const char *src, int *cursor, int **vidxs, int **uvidxs)
 {
 	int tmpc = *cursor;
@@ -60,33 +58,25 @@ static void consume_tri_idxs_and_uvs(const char *src, int *cursor, int **vidxs, 
 	if (!isdigit(c)) {
 		ERROR("obj_load_file file has broken indices (char: %c)\n", c);
 	}
-	int yes = 0;
 	/* here we are sure the next number is a value */
-	while (1) {
-		if (src[tmpc] == '\n')
-			break;
+	while (src[tmpc] != '\n' && src[tmpc] != '\0') {
 		char *tmpsrc = NULL;
-		DA_APPEND(*vidxs, strtol(src + tmpc, &tmpsrc, 0));
-		printf("last: %d\n", DA_LAST(*vidxs));
-		tmpc = (tmpsrc - (src + tmpc)) + 1;
-		/* printf("dif is %lu\n", tmpsrc - src); */
-		/* printf("%d but %lu\n", tmpc, strlen(src)); */
+		DA_APPEND(*vidxs, strtol(src + tmpc, &tmpsrc, 10));
+		tmpc = tmpsrc - src;
 		if (src[tmpc] == '/') {
-			DA_APPEND(*uvidxs, strtol(src + tmpc, &tmpsrc, 0));
-			tmpc = (tmpsrc - (src + tmpc)) + 1;
+			tmpc++;
+			if (isdigit(src[tmpc])) {
+				DA_APPEND(*uvidxs, strtol(src + tmpc, &tmpsrc, 10));
+				tmpc = tmpsrc - src;
+			}
+			if (src[tmpc] == '/') {
+				/* normal index, we dont use it */
+				strtol(src + tmpc + 1, &tmpsrc, 10);
+				tmpc = tmpsrc - src;
+			}
 		}
-		tmpc++;
-	}
-	if (yes) {
-		for (int i = 0; i < DA_COUNT(*vidxs); i++)
-			printf("%d ", (*vidxs)[i]);
-		printf("\n");
-		for (int i = 0; i < DA_COUNT(*uvidxs); i++)
-			printf("%d ", (*uvidxs)[i]);
-		printf("\n");
-		iii++;
-		if (iii == 3)
-			assert(0);
+		while (src[tmpc] == ' ' || src[tmpc] == '\t')
+			tmpc++;
 	}
 	*cursor = tmpc;
 }
@@ -127,7 +117,8 @@ int obj_load_mesh(const char *path, mesh *dst)
 			cursor += 2; /* skip v and space */
 			consume_tri_idxs_and_uvs(src, &cursor, &vidxs, &uvidxs);
 		}
-		cursor++;
+		if (src[cursor] != '\0')
+			cursor++;
 	}
 	/* last, build the mesh */
 	mesh m = mesh_alloc();
@@ -136,9 +127,18 @@ int obj_load_mesh(const char *path, mesh *dst)
 		t.p0 = verts[vidxs[i + 0] - 1];
 		t.p1 = verts[vidxs[i + 1] - 1];
 		t.p2 = verts[vidxs[i + 2] - 1];
+		if (DA_COUNT(uvidxs) != 0) {
+			t.uv0 = uvs[uvidxs[i + 0] - 1];
+			t.uv1 = uvs[uvidxs[i + 1] - 1];
+			t.uv2 = uvs[uvidxs[i + 2] - 1];
+		}
 		DA_APPEND(m.tris, t);
 	}
 	printf("tris count: %d\n", DA_COUNT(vidxs) / 3);
 	*dst = m;
+	DA_FREE(verts);
+	DA_FREE(uvs);
+	DA_FREE(vidxs);
+	DA_FREE(uvidxs);
 	return NOERR;
 }

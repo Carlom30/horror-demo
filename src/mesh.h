@@ -13,6 +13,14 @@ typedef struct {
 			v3 p2;
 		};
 	};
+	union {
+		v3 uvs[3];
+		struct {
+			v3 uv0;
+			v3 uv1;
+			v3 uv2;
+		};
+	};
 	v3 norm;
 	v3 p0col;
 	v3 p1col;
@@ -24,6 +32,7 @@ typedef struct {
 	float theta; /* TODO implement axis rotation */
 	v3 pos;
 	v3 scale;
+	png texture; /* material? */
 } mesh;
 
 enum mesh_name {
@@ -32,6 +41,7 @@ enum mesh_name {
 	MN_COW       = 2,
 	MN_AL        = 3,
 	MN_PENG      = 4,
+	MN_SKULL     = 5,
 	MN_CNT
 };
 

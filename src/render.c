@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "lmath.h"
+#include "utils.h"
 
 #define SURFW 300
 #define SURFH 225
@@ -83,6 +84,16 @@ void render_set_color(uint8_t r, uint8_t g, uint8_t b)
 	render.color = SDL_MapRGBA(render.winsurf->format, r, g, b, 255);
 }
 
+void render_set_pixel(uint32_t p, int x, int y)
+{
+	/* note that this is not calling SDL_MapRGBA so make sure to pass a pixel
+	   with the correct format */
+	if (COORD_OUT_BUF_BOUND(x, y)) {
+		ERROR("render_set_pixel coordinates out of bound\n");
+	}
+	render.buffer[bufidx(x, y)] = p;
+}
+
 void render_draw_rect(const rect *r)
 {
 	assert(r);
@@ -144,7 +155,7 @@ void render_plot_line(int x0, int y0, int x1, int y1)
 
 void render_clear()
 {
-	memset(render.buffer, 0, render.surf_w * render.surf_h * sizeof(uint32_t));
+	memset(render.buffer, 0x18, render.surf_w * render.surf_h * sizeof(uint32_t));
 }
 
 void render_update()

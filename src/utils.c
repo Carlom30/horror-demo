@@ -2,6 +2,9 @@
 
 #include <stdio.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 int read_file_str(const char *path, char **dst)
 {
 	if (!path || !dst) return ERR;
@@ -41,5 +44,17 @@ int read_file_str(const char *path, char **dst)
 
 	fclose(fd);
 	*dst = buf;
+	return NOERR;
+}
+
+int png_load(const char *path, png *dst)
+{
+	if (dst == NULL)
+		return ERR;
+	png p = {0};
+	p.data = stbi_load(path, &p.w, &p.h, &p.n, 4);
+	if (!p.data)
+		return ERR;
+	*dst = p;
 	return NOERR;
 }

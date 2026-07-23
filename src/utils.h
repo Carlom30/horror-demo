@@ -17,6 +17,15 @@
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 typedef struct {
+	unsigned char *data;
+	int w;
+	int h;
+	int n;
+} png;
+
+int png_load(const char *path, png *dst);
+
+typedef struct {
 	int cnt;
 	int cap;
 } header;

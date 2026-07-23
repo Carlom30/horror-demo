@@ -50,8 +50,8 @@ void loop_init()
 {
 	DA_ALLOC(scene);
 	mesh_load_all();
-	v3 p = v3mk(0.0f, 0.0f, 10.0f);
-	mesh m = mesh_get_by_name(MN_PENG);
+	v3 p = v3mk(0.0f, -13.0f, 50.0f);
+	mesh m = mesh_get_by_name(MN_SKULL);
 	for (int i = 0; i < DA_COUNT(m.tris); i++) {
 		m.tris[i].p0col = v3mk(255, 255, 255);
 		m.tris[i].p1col = v3mk(255, 255, 255);
@@ -75,10 +75,18 @@ static float edge_function(v3 v0, v3 v1, v3 p)
 	return (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y ) * (v1.x - v0.x);
 }
 
+static inline v3 texture_affine_map(triangle t, float w0, float w1, float w2)
+{
+	v3 m = {0};
+	m.x = t.uv0.x * w0 + t.uv1.x * w1 + t.uv2.x * w2;
+	m.y = t.uv0.y * w0 + t.uv1.y * w1 + t.uv2.y * w2;
+	return m;
+}
+
 /* https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html */
 static int w, h;
 static int done = 0;
-static void raster_triangle(triangle t)
+static void raster_triangle(triangle t, png texture)
 {
 	if (!done) {
 		done = 1;
@@ -117,11 +125,13 @@ static void raster_triangle(triangle t)
 			if (z > 1.0f) continue;
 			zbuffer[y * w + x] = z;
 
-			v3 c0 = v3_mul_f(t.p0col, w0);
-			v3 c1 = v3_mul_f(t.p1col, w1);
-			v3 c2 = v3_mul_f(t.p2col, w2);
-			v3 cf = v3_sum(v3_sum(c0, c1), c2);
-			render_set_color(cf.x * dp, cf.y * dp, cf.z * dp);
+			v3 textcoord = texture_affine_map(t, w0, w1, w2);
+			textcoord.x = textcoord.x * texture.w;
+			textcoord.y = textcoord.y * texture.h;
+			int tx = CLAMP(textcoord.x, 0, (texture.w - 1));
+			int ty = CLAMP((texture.w - textcoord.y), 0, (texture.h - 1));
+			color_t texel = ((color_t *)texture.data)[ty * texture.w + tx];
+			render_set_color(texel.r * dp, texel.g * dp, texel.b * dp);
 			render_draw_point(x, y);
 		}
 	}
@@ -130,8 +140,6 @@ static void raster_triangle(triangle t)
 static void tris_raster(triangle *tris)
 {
 	assert(tris);
-	for (int i = 0; i < DA_COUNT(tris); i++)
-		raster_triangle(tris[i]);
 }
 
 static void mesh_project(const mesh *m, triangle **trisproj)
@@ -183,7 +191,7 @@ void loop_main()
 	float one = 0;
 	int ww, wh;
 	render_getwh(&ww, &wh);
-	perspective = m4_perspective(0.1f, 50.0f, (float)wh / (float)ww, M_PI / 4.0f);
+	perspective = m4_perspective(0.1f, 100.0f, (float)wh / (float)ww, M_PI / 4.0f);
 	while (!quit) {
 		/* TODO input system */
 		SDL_PumpEvents();
@@ -228,7 +236,8 @@ void loop_main()
 			DA_ALLOC(trisproj);
 			mesh *m = &scene[c];
 			mesh_project((const mesh*)m, &trisproj);
-			tris_raster(trisproj);
+			for (int i = 0; i < DA_COUNT(trisproj); i++)
+				raster_triangle(trisproj[i], m->texture);
 			DA_FREE(trisproj);
 			m->theta += 0.3f * delta_time;
 		}
