@@ -50,8 +50,8 @@ void loop_init()
 {
 	DA_ALLOC(scene);
 	mesh_load_all();
-	v3 p = v3mk(0.0f, -13.0f, 50.0f);
-	mesh m = mesh_get_by_name(MN_SKULL);
+	v3 p = v3mk(0.0f, 0.0f, 10.0f);
+	mesh m = mesh_get_by_name(MN_PENG);
 	for (int i = 0; i < DA_COUNT(m.tris); i++) {
 		m.tris[i].p0col = v3mk(255, 255, 255);
 		m.tris[i].p1col = v3mk(255, 255, 255);
@@ -75,6 +75,16 @@ static float edge_function(v3 v0, v3 v1, v3 p)
 	return (p.x - v0.x) * (v1.y - v0.y) - (p.y - v0.y ) * (v1.x - v0.x);
 }
 
+static inline color_t color_barycentric(triangle t, float w0, float w1, float w2)
+{
+	color_t c = {0};
+	c.r = t.p0col.x * w0 + t.p1col.x * w1 + t.p2col.x * w2;
+	c.g = t.p0col.y * w0 + t.p1col.y * w1 + t.p2col.y * w2;
+	c.b = t.p0col.z * w0 + t.p1col.z * w1 + t.p2col.z * w2;
+	c.a = 255;
+	return c;
+}
+
 static inline v3 texture_affine_map(triangle t, float w0, float w1, float w2)
 {
 	v3 m = {0};
@@ -86,7 +96,7 @@ static inline v3 texture_affine_map(triangle t, float w0, float w1, float w2)
 /* https://www.scratchapixel.com/lessons/3d-basic-rendering/rasterization-practical-implementation/rasterization-stage.html */
 static int w, h;
 static int done = 0;
-static void raster_triangle(triangle t, png texture)
+static void fragment_shader(triangle t, image texture)
 {
 	if (!done) {
 		done = 1;
@@ -125,14 +135,20 @@ static void raster_triangle(triangle t, png texture)
 			if (z > 1.0f) continue;
 			zbuffer[y * w + x] = z;
 
-			v3 textcoord = texture_affine_map(t, w0, w1, w2);
-			textcoord.x = textcoord.x * texture.w;
-			textcoord.y = textcoord.y * texture.h;
-			int tx = CLAMP(textcoord.x, 0, (texture.w - 1));
-			int ty = CLAMP((texture.w - textcoord.y), 0, (texture.h - 1));
-			color_t texel = ((color_t *)texture.data)[ty * texture.w + tx];
-			render_set_color(texel.r * dp, texel.g * dp, texel.b * dp);
-			render_draw_point(x, y);
+			if (texture.data) {
+				v3 textcoord = texture_affine_map(t, w0, w1, w2);
+				textcoord.x = textcoord.x * texture.w;
+				textcoord.y = textcoord.y * texture.h;
+				int tx = CLAMP(textcoord.x, 0, (texture.w - 1));
+				int ty = CLAMP((texture.h - textcoord.y), 0, (texture.h - 1));
+				color_t texel = ((color_t *)texture.data)[ty * texture.w + tx];
+				render_set_color(texel.r * dp, texel.g * dp, texel.b * dp);
+				render_draw_point(x, y);
+			} else {
+				color_t c = color_barycentric(t, w0, w1, w2);
+				render_set_color(c.r * dp, c.g * dp, c.b * dp);
+				render_draw_point(x, y);
+			}
 		}
 	}
 }
@@ -142,7 +158,7 @@ static void tris_raster(triangle *tris)
 	assert(tris);
 }
 
-static void mesh_project(const mesh *m, triangle **trisproj)
+static void vertex_shader(const mesh *m, triangle **trisproj)
 {
 	int ww, wh;
 	render_getwh(&ww, &wh);
@@ -235,9 +251,9 @@ void loop_main()
 		for (int c = 0; c < DA_COUNT(scene); c++) {
 			DA_ALLOC(trisproj);
 			mesh *m = &scene[c];
-			mesh_project((const mesh*)m, &trisproj);
+			vertex_shader((const mesh*)m, &trisproj);
 			for (int i = 0; i < DA_COUNT(trisproj); i++)
-				raster_triangle(trisproj[i], m->texture);
+				fragment_shader(trisproj[i], m->texture);
 			DA_FREE(trisproj);
 			m->theta += 0.3f * delta_time;
 		}

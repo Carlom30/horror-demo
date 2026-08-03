@@ -21,9 +21,9 @@ typedef struct {
 	int w;
 	int h;
 	int n;
-} png;
+} image;
 
-int png_load(const char *path, png *dst);
+int image_load(const char *path, image *dst);
 
 typedef struct {
 	int cnt;

@@ -47,11 +47,11 @@ int read_file_str(const char *path, char **dst)
 	return NOERR;
 }
 
-int png_load(const char *path, png *dst)
+int image_load(const char *path, image *dst)
 {
 	if (dst == NULL)
 		return ERR;
-	png p = {0};
+	image p = {0};
 	p.data = stbi_load(path, &p.w, &p.h, &p.n, 4);
 	if (!p.data)
 		return ERR;

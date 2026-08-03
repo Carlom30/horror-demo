@@ -32,7 +32,7 @@ typedef struct {
 	float theta; /* TODO implement axis rotation */
 	v3 pos;
 	v3 scale;
-	png texture; /* material? */
+	image texture; /* material? */
 } mesh;
 
 enum mesh_name {

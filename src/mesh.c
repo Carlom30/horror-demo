@@ -52,10 +52,10 @@ void mesh_load_all(void)
 	obj_load_mesh("assets/al.obj", &m);
 	DA_APPEND(loaded_meshes, m);
 	obj_load_mesh("assets/peng/PenguinBaseMesh.obj", &m);
-	png_load("assets/peng/PenguinText.png", &m.texture);
+	image_load("assets/peng/PenguinText.png", &m.texture);
 	DA_APPEND(loaded_meshes, m);
 	obj_load_mesh("assets/skull/skull.obj", &m);
-	png_load("assets/skull/skull.jpg", &m.texture);
+	image_load("assets/skull/skull.jpg", &m.texture);
 	DA_APPEND(loaded_meshes, m);
 
 }
