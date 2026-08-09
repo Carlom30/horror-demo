@@ -8,12 +8,14 @@
 #include "mesh.h"
 #include "utils.h"
 #include "obj.h"
+#include "display.h"
 
 int main(void)
 {
 	int ww = 800;
 	int wh = 600;
-	render_init(ww, wh, "The Dolphin Hotel");
+	display_init(ww, wh, "The Dolphin Hotel");
+	render_init();
 	loop_init();
 	loop_main();
 	return 0;

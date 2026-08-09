@@ -17,7 +17,7 @@ typedef union {
 	};
 } color_t;
 
-int render_init(int win_w, int win_h, const char *name);
+int render_init();
 void render_getwh(int *w, int *h);
 void render_set_color(uint8_t r, uint8_t g, uint8_t b);
 void render_set_pixel(uint32_t p, int x, int y);

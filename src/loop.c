@@ -153,11 +153,6 @@ static void fragment_shader(triangle t, image texture)
 	}
 }
 
-static void tris_raster(triangle *tris)
-{
-	assert(tris);
-}
-
 static void vertex_shader(const mesh *m, triangle **trisproj)
 {
 	int ww, wh;

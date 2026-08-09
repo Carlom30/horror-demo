@@ -1,32 +1,28 @@
 #include "render.h"
 
-#include "../libs/SDL2/include/SDL2/SDL.h"
 #include <assert.h>
+#include <string.h>
 
 #include "lmath.h"
 #include "utils.h"
+#include "display.h"
 
 #define SURFW 300
 #define SURFH 225
 
 static struct {
 	int init;
-	SDL_Window *win;
 	uint32_t *buffer;
-	SDL_Surface *winsurf;
-	SDL_Surface *tmpsurf;
-	int surf_w;
-	int surf_h;
-	int win_w;
-	int win_h;
+	int fb_w;
+	int fb_h;
 	uint32_t color;
 } render = {0};
 
-#define COORD_OUT_BUF_BOUND(x, y) ((x) < 0 || (x) >= render.surf_w || (y) < 0 || (y) >= render.surf_h)
+#define COORD_OUT_BUF_BOUND(x, y) ((x) < 0 || (x) >= render.fb_w || (y) < 0 || (y) >= render.fb_h)
 
 static inline int bufidx(int x, int y)
 {
-	return y * render.surf_w + x;
+	return y * render.fb_w + x;
 }
 
 void rect_print(rect r)
@@ -40,48 +36,26 @@ void render_getwh(int *w, int *h)
 		printf("ERROR: render system was not initialized\n");
 		assert(0);
 	}
-	*w = render.surf_w;
-	*h = render.surf_h;
+	*w = render.fb_w;
+	*h = render.fb_h;
 }
 
 /* TODO: separate rendering surface from the window surface. This way, we can render less pixel and then
    blit the smaller surface scaled to the real window */
-int render_init(int win_w, int win_h, const char *name)
+int render_init()
 {
-	if (((float)win_w / (float)win_h) != (4.0f / 3.0f)) {
-		printf("ERROR: please initialize a 4/3 window\n");
-		assert(0);
-	}
-	render.win_w = win_w;
-	render.win_h = win_h;
-	SDL_Init(SDL_INIT_VIDEO);
-	render.win = SDL_CreateWindow(
-		name,
-		SDL_WINDOWPOS_CENTERED,
-		SDL_WINDOWPOS_CENTERED,
-		win_w, win_h, 0);
-	render.color = SDL_MapRGBA(SDL_GetWindowSurface(render.win)->format,
-				0, 0, 0, 255);
-	SDL_SetRelativeMouseMode(SDL_TRUE);
-	SDL_WarpMouseInWindow(render.win, 0, 0);
-
 	/* now the real rendering surface, which will be half of the window size */
-	render.surf_w = SURFW;
-	render.surf_h = SURFH;
-	render.buffer = malloc(sizeof(uint32_t) * (render.surf_w) * (render.surf_h));
-	render.tmpsurf = SDL_CreateRGBSurfaceWithFormat(0,
-		render.surf_w,
-		render.surf_h,
-		sizeof(uint32_t),
-		SDL_GetWindowSurface(render.win)->format->format);
-	render.winsurf = SDL_GetWindowSurface(render.win);
+	render.fb_w = SURFW;
+	render.fb_h = SURFH;
+	render.buffer = malloc(sizeof(uint32_t) * (render.fb_w) * (render.fb_h));
+	render.color = display_map_rgba(0, 0, 0, 255);
 	render.init = 1;
 	return 0;
 }
 
 void render_set_color(uint8_t r, uint8_t g, uint8_t b)
 {
-	render.color = SDL_MapRGBA(render.winsurf->format, r, g, b, 255);
+	render.color = display_map_rgba(r, g, b, 255);
 }
 
 void render_set_pixel(uint32_t p, int x, int y)
@@ -155,14 +129,10 @@ void render_plot_line(int x0, int y0, int x1, int y1)
 
 void render_clear()
 {
-	memset(render.buffer, 0x18, render.surf_w * render.surf_h * sizeof(uint32_t));
+	memset(render.buffer, 0x18, render.fb_w * render.fb_h * sizeof(uint32_t));
 }
 
 void render_update()
 {
-	SDL_Surface *winsur = render.winsurf;
-	memcpy(render.tmpsurf->pixels, render.buffer,
-		sizeof(uint32_t) * render.surf_w * render.surf_h);
-	SDL_BlitScaled(render.tmpsurf, NULL, winsur, NULL);
-	SDL_UpdateWindowSurface(render.win);
+	display_update(render.buffer);
 }
