@@ -4,7 +4,6 @@
 #include <math.h>
 #include <stdio.h>
 
-#include "loop.h"
 #include "render.h"
 #include "obj.h"
 

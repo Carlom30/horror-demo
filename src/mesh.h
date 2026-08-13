@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "render.h"
 
-typedef struct {
+typedef struct triangle {
 	union {
 		v3 ps[3];
 		struct {
@@ -27,7 +27,7 @@ typedef struct {
 	v3 p2col;
 } triangle;
 
-typedef struct {
+typedef struct mesh {
 	DA(triangle) tris;
 	float theta; /* TODO implement axis rotation */
 	v3 pos;

@@ -2,6 +2,12 @@
 
 #include <stdint.h>
 
+#include "utils.h"
+#include "lmath.h"
+
+typedef struct mesh mesh;
+typedef struct triangle triangle;
+
 typedef struct {
 	int x, y;
 	int w, h;
@@ -27,3 +33,14 @@ void render_draw_rect(const rect *r);
 void render_fill_rect(const rect *r);
 void render_clear();
 void render_update();
+
+/* 3D stuff */
+void scene_append_object(mesh obj);
+
+/* move this on a dedicated module */
+void delta_time_update();
+float delta_time();
+camera *render_camera_ptr();
+mesh *render_scene();
+void vertex_shader(const mesh *m, triangle **trisproj);
+void fragment_shader(triangle t, image texture);
