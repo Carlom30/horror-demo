@@ -4,6 +4,8 @@
 #include "utils.h"
 #include "render.h"
 
+typedef struct rect rect;
+
 typedef struct triangle {
 	union {
 		v3 ps[3];
@@ -29,21 +31,21 @@ typedef struct triangle {
 
 typedef struct mesh {
 	DA(triangle) tris;
-	float theta; /* TODO implement axis rotation */
-	v3 pos;
-	v3 scale;
 	image texture; /* material? */
 } mesh;
 
-enum mesh_name {
+typedef enum mesh_name {
 	MN_CUBE      = 0,
 	MN_ICOSPHERE = 1,
 	MN_COW       = 2,
 	MN_AL        = 3,
 	MN_PENG      = 4,
 	MN_SKULL     = 5,
+
+
+	MN_NOTHING,
 	MN_CNT
-};
+} mesh_name;
 
 triangle trimk(v3, v3, v3);
 rect find_triangle_box(triangle t);
@@ -53,5 +55,4 @@ mesh mesh_get_by_name(enum mesh_name name);
 mesh mesh_cube(const v3 *pos);
 v3 triangle_normal(triangle t);
 float triangle_area(triangle t);
-m4 mesh_transform(mesh m);
 

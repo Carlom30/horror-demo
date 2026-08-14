@@ -8,6 +8,7 @@
 #include "utils.h"
 #include "display.h"
 #include "mesh.h"
+#include "scene.h"
 
 #define SURFW 300
 #define SURFH 225
@@ -28,14 +29,10 @@ static uint64_t old = 0;
 static float one = 0;
 static float dt = 0.0f;
 
-static mesh *scene = NULL;
 static camera cam = {0};
 static m4 perspective;
 static m4 view;
 static float *zbuffer = NULL;
-
-/* TODO: move this in a input manager system */
-static SDL_Event e;
 
 #define COORD_OUT_BUF_BOUND(x, y) ((x) < 0 || (x) >= render.fb_w || (y) < 0 || (y) >= render.fb_h)
 
@@ -69,19 +66,10 @@ int render_init()
 	render.buffer = malloc(sizeof(uint32_t) * (render.fb_w) * (render.fb_h));
 	render.color = display_map_rgba(0, 0, 0, 255);
 	render.init = 1;
-	DA_ALLOC(scene);
 	mesh_load_all();
-	v3 p = v3mk(0.0f, 0.0f, 10.0f);
 	perspective = m4_perspective(0.1f, 100.0f, (float)render.fb_h / (float)render.fb_w, M_PI / 4.0f);
-	mesh m = mesh_get_by_name(MN_ICOSPHERE);
-	for (int i = 0; i < DA_COUNT(m.tris); i++) {
-		m.tris[i].p0col = v3mk(255, 255, 255);
-		m.tris[i].p1col = v3mk(255, 255, 255);
-		m.tris[i].p2col = v3mk(255, 255, 255);
-	}
-	m.pos = p;
-	DA_APPEND(scene, m);
 	cam = camera_init();
+	/* dead code below? maybe remove render_getwh... */
 	int w, h;
 	render_getwh(&w, &h);
 	zbuffer = calloc(w * h, sizeof(float));
@@ -260,16 +248,17 @@ void fragment_shader(triangle t, image texture)
 	}
 }
 
-void vertex_shader(const mesh *m, triangle **trisproj)
+void vertex_shader(const game_object *go, triangle **trisproj)
 {
 	int ww, wh;
 	render_getwh(&ww, &wh);
-	m4 mvp = mesh_transform(*m);
+	m4 mvp = game_object_transform(*go);
+	mesh m = mesh_get_by_name(go->meshid);
 	/* m4 tr = mvp; */
 	mvp = m4mul(view, mvp);
 	mvp = m4mul(perspective, mvp);
-	for (int i = 0; i < DA_COUNT(m->tris); i++) {
-		triangle tri = m->tris[i];
+	for (int i = 0; i < DA_COUNT(m.tris); i++) {
+		triangle tri = m.tris[i];
 		v4 p0 = v3v4(tri.p0);
 		v4 p1 = v3v4(tri.p1);
 		v4 p2 = v3v4(tri.p2);
@@ -295,11 +284,6 @@ void vertex_shader(const mesh *m, triangle **trisproj)
 	}
 }
 
-void scene_append_object(mesh obj)
-{
-	DA_APPEND(scene, obj);
-}
-
 float delta_time()
 {
 	return dt;
@@ -320,9 +304,20 @@ void delta_time_update()
 	}
 }
 
-mesh *render_scene()
+void render_scene()
 {
-	return scene;
+	game_object *scene = scene_get();
+	triangle *trisproj = NULL;
+	for (int c = 0; c < DA_COUNT(scene); c++) {
+		game_object *go = &scene[c];
+		mesh m = mesh_get_by_name(go->meshid);
+		DA_ALLOC(trisproj);
+		vertex_shader((const game_object *)go, &trisproj);
+		for (int i = 0; i < DA_COUNT(trisproj); i++)
+			fragment_shader(trisproj[i], m.texture);
+		DA_FREE(trisproj);
+		go->theta += 0.3f * dt;
+	}
 }
 
 camera *render_camera_ptr()

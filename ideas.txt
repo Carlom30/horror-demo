@@ -15,3 +15,9 @@ Giocare di più con il concetto di essere in un hotel?
 
 Il gioco si sviluppa alla isaac, i biomi, o piani, sono quelli che ti aspetteresti in un hotel.
 Lobby, uffici, piani di camere, caffetteria, ristorante ecc...
+
+- meccanica:
+  in ogni finestra c'è un prompt: "end it", puoi usarla come meccanica per ricominciare la partita... Oppure, se impazzisci, potresti raramente ritrovarti davanti al prompt, casualmente
+
+- meccanica:
+  un po di crafting con circuiteria varia? Magari per riattivare la corrente o cose del genere.

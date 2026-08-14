@@ -25,15 +25,6 @@ rect find_triangle_box(triangle t)
 	return r;
 }
 
-m4 mesh_transform(mesh m)
-{
-	m4 tr = m4_rotation_y(m.theta);
-	tr = m4mul(m4_rotation_y(m.theta), tr);
-	tr = m4mul(m4_translation(m.pos), tr);
-	tr = m4mul(m4_scale(m.scale), tr);
-	return tr;
-}
-
 void mesh_load_all(void)
 {
 	/* this will, for now, load evey mesh into an array.
@@ -56,7 +47,15 @@ void mesh_load_all(void)
 	obj_load_mesh("assets/skull/skull.obj", &m);
 	image_load("assets/skull/skull.jpg", &m.texture);
 	DA_APPEND(loaded_meshes, m);
-
+	/* TODO make material */
+	for (int i = 0; i < DA_COUNT(loaded_meshes); i++) {
+		mesh *m = &loaded_meshes[i];
+		for (int j = 0; j < DA_COUNT(m->tris); j++) {
+			m->tris[j].p0col = v3mk(255, 255, 255);
+			m->tris[j].p1col = v3mk(255, 255, 255);
+			m->tris[j].p2col = v3mk(255, 255, 255);
+		}
+	}
 }
 
 mesh mesh_get_by_name(enum mesh_name name)
@@ -67,7 +66,6 @@ mesh mesh_get_by_name(enum mesh_name name)
 mesh mesh_alloc()
 {
 	mesh m = {0};
-	m.scale = v3mk(1.0f, 1.0f, 1.0f);
 	DA_ALLOC(m.tris);
 	return m;
 }
@@ -98,8 +96,6 @@ mesh mesh_cube(const v3 *pos)
 	DA_APPEND(c.tris, trimk(ps[4], ps[3], ps[7]));
 	DA_APPEND(c.tris, trimk(ps[1], ps[5], ps[6]));
 	DA_APPEND(c.tris, trimk(ps[1], ps[6], ps[2]));
-	if (pos)
-		c.pos = *pos;
 	return c;
 }
 

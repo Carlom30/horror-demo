@@ -7,8 +7,9 @@
 
 typedef struct mesh mesh;
 typedef struct triangle triangle;
+typedef struct game_object game_object;
 
-typedef struct {
+typedef struct rect {
 	int x, y;
 	int w, h;
 } rect;
@@ -41,6 +42,6 @@ void scene_append_object(mesh obj);
 void delta_time_update();
 float delta_time();
 camera *render_camera_ptr();
-mesh *render_scene();
-void vertex_shader(const mesh *m, triangle **trisproj);
+void render_scene();
+void vertex_shader(const game_object *go, triangle **trisproj);
 void fragment_shader(triangle t, image texture);

@@ -10,6 +10,7 @@
 #include "utils.h"
 #include "obj.h"
 #include "display.h"
+#include "scene.h"
 
 /* TODO input system */
 void camera_rotate(camera *cam, float speed)
@@ -43,6 +44,7 @@ int main(void)
 	int wh = 600;
 	display_init(ww, wh, "The Dolphin Hotel");
 	render_init();
+	scene_init();
 	int quit = 0;
 	SDL_Event e;
 	render_getwh(&ww, &wh);
@@ -73,18 +75,7 @@ int main(void)
 		}
 		camera_rotate(cam, 0.005f);
 		render_clear();
-		triangle *trisproj = NULL;
-		render_set_color(0, 200, 0);
-		mesh *scene = render_scene();
-		for (int c = 0; c < DA_COUNT(scene); c++) {
-			DA_ALLOC(trisproj);
-			mesh *m = &scene[c];
-			vertex_shader((const mesh*)m, &trisproj);
-			for (int i = 0; i < DA_COUNT(trisproj); i++)
-				fragment_shader(trisproj[i], m->texture);
-			DA_FREE(trisproj);
-			m->theta += 0.3f * dt;
-		}
+		render_scene();
 		render_update();
 	}
 	return 0;
