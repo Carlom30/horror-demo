@@ -21,3 +21,9 @@ Lobby, uffici, piani di camere, caffetteria, ristorante ecc...
 
 - meccanica:
   un po di crafting con circuiteria varia? Magari per riattivare la corrente o cose del genere.
+
+STORIA:
+
+L'intero gioco è una setup per un rituale. Il rito è la ripresa degli eventi del protagonista che procede a fare delle specifiche cose, indotto a farle, ovviamente. Durante il gioco è possibile incontrare casualmente il mistery man, un personaggio misterioso con una telecamera che riprendere spasmodicamente il giocatore. Sarebbe figo se ogni tanto il giocatore trovasse delle foto o riprese di quello che sta facendo. La creatura che viene risvegliata da questo processo è una divinità antica (bughuul) che vive attraverso la ripresa di questi rituali. Il giocatore deve collezionare delle parti di corpo e ricostruirle per dare una forma al Dio. Questa è la line principale. Ma ovviamente il giocatore ha la capacità di prendere strade alternative alla trama principale.
+
+Una volta finito il corpo, il mistery man finisce la ripresa, apre la camera, prendere la cassetta e la inserisce nel nuovo corpo del Dio.
