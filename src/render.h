@@ -39,9 +39,10 @@ void render_update();
 void scene_append_object(mesh obj);
 
 /* move this on a dedicated module */
+struct camera camera_init();
 void delta_time_update();
 float delta_time();
-camera *render_camera_ptr();
+struct camera *render_camera_ptr();
 void render_scene();
 void vertex_shader(const game_object *go, triangle **trisproj);
 void fragment_shader(triangle t, image texture);

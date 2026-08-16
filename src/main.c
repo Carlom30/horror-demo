@@ -10,10 +10,11 @@
 #include "utils.h"
 #include "obj.h"
 #include "display.h"
+#include "input.h"
 #include "scene.h"
 
 /* TODO input system */
-void camera_rotate(camera *cam, float speed)
+void camera_rotate(struct camera *cam, float speed)
 {
 	int dx, dy;
 	SDL_GetRelativeMouseState(&dx, &dy);
@@ -45,6 +46,7 @@ int main(void)
 	display_init(ww, wh, "The Dolphin Hotel");
 	render_init();
 	scene_init();
+	input_init();
 	int quit = 0;
 	SDL_Event e;
 	render_getwh(&ww, &wh);
@@ -60,7 +62,7 @@ int main(void)
 		}
 		/* TODO: Input system */
 		const uint8_t *state = SDL_GetKeyboardState(NULL);
-		camera *cam = render_camera_ptr();
+		struct camera *cam = render_camera_ptr();
 		if (state[SDL_SCANCODE_W]) {
 			cam->pos = v3_sum(cam->pos, v3_mul_f(cam->dir, 10.0f * dt));
 		}
@@ -72,6 +74,13 @@ int main(void)
 		}
 		if (state[SDL_SCANCODE_D]) {
 			cam->pos = v3_sum(cam->pos, v3_mul_f(v3_norm(cross_product(v3mk(0.0f, 1.0f, 0.0f), cam->dir)), dt * 2.0f));
+		}
+		input_update();
+		game_object *scene = scene_get();
+		for (int i = 0; i < DA_COUNT(scene); i++) {
+			game_object go = scene[i];
+			if (go.update)
+				go.update(NULL);
 		}
 		camera_rotate(cam, 0.005f);
 		render_clear();

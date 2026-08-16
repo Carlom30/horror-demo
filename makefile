@@ -5,9 +5,9 @@ CPATH=-I./libs/SDL2/include/
 LDPATH=-L$(LIBPATH)
 LIBS= -lSDL2 -lm #-l:libSDL2.a
 SRC=src/main.c src/lmath.c src/render.c src/mesh.c src/utils.c \
-	src/obj.c src/display.c src/scene.c
+	src/obj.c src/display.c src/scene.c src/input.c
 DEPS=src/lmath.h src/render.h src/mesh.h src/utils.h src/obj.h \
-	src/display.h src/scene.h
+	src/display.h src/scene.h src/input.h
 EXENAME=game
 RUNNAME=run
 TARGETDIR=target

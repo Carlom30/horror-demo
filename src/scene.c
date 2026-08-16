@@ -2,14 +2,23 @@
 
 #include "utils.h"
 #include "lmath.h"
+#include "input.h"
 
 static game_object *scene;
+
+void test_update(void *args)
+{
+	input_state is = input_state_get();
+	if (is.ks[SCANCODE_H] & (KS_PRESS | KS_RELEASE))
+		printf("h pressed on icosphere!\n");
+}
 
 int scene_init()
 {
 	DA_ALLOC(scene);
-	uint32_t goid = game_object_make(MN_SKULL);
+	uint32_t goid = game_object_make(MN_ICOSPHERE);
 	game_object *go = game_object_get_by_id(goid);
+	go->update = test_update;
 	go->pos = v3mk(0.0f, 0.0f, 10.0f);
 	return 0;
 }

@@ -227,21 +227,8 @@ m4 m4_perspective(float near, float far, float ratio, float fov)
 	return p;
 }
 
-camera camera_mk(v3 pos, v3 dir)
-{
-	return (camera){ pos, dir };
-}
-
-camera camera_init()
-{
-	return (camera){
-		(v3){0}, (v3){ 0.0f, 0.0f, 1.0f },
-		.yaw = M_PI / 2.0f,
-	};
-}
-
 static v3 world_up = { 0.0f, 1.0f, 0.0 };
-m4 m4_camera_view(camera c)
+m4 m4_camera_view(struct camera c)
 {
 	/* assert(v3_magn(c.dir) == 1.0f); */
 	v3 z = v3_norm(c.dir);

@@ -4,6 +4,11 @@
 #define MAX(a, b) ((a) > (b) ? (a) : (b))
 #define CLAMP(v, min, max) (MAX(MIN(v, max), min))
 
+typedef struct v2i {
+	int x;
+	int y;
+} v2i;
+
 typedef union {
 	float cmps[3];
 	struct {
@@ -34,12 +39,12 @@ typedef union {
 } m4;
 
 /* is this a pure mathematical object? */
-typedef struct {
+struct camera {
 	v3 pos;
 	v3 dir;
 	float yaw;
 	float pitch;
-} camera;
+};
 
 void v3_print(v3);
 void v4_print(v4);
@@ -72,11 +77,8 @@ v3 project(v4 v);
 v3 clip_to_scr(v3 v, int win_w, int win_h);
 
 /* camera */
-camera camera_mk(v3 pos, v3 dir);
-
 /* return a 0 pos z directioned camera */
-camera camera_init();
-m4 m4_camera_view(camera c);
+m4 m4_camera_view(struct camera c);
 
 /* shenanigans */
 float rand_float(void);

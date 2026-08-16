@@ -29,7 +29,7 @@ static uint64_t old = 0;
 static float one = 0;
 static float dt = 0.0f;
 
-static camera cam = {0};
+static struct camera cam = {0};
 static m4 perspective;
 static m4 view;
 static float *zbuffer = NULL;
@@ -56,6 +56,13 @@ void render_getwh(int *w, int *h)
 	*h = render.fb_h;
 }
 
+struct camera camera_init()
+{
+	return (struct camera){
+		(v3){0}, (v3){ 0.0f, 0.0f, 1.0f },
+		.yaw = M_PI / 2.0f,
+	};
+}
 /* TODO: separate rendering surface from the window surface. This way, we can render less pixel and then
    blit the smaller surface scaled to the real window */
 int render_init()
@@ -320,7 +327,7 @@ void render_scene()
 	}
 }
 
-camera *render_camera_ptr()
+struct camera *render_camera_ptr()
 {
 	return &cam;
 }
