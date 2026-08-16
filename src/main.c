@@ -79,8 +79,11 @@ int main(void)
 		game_object *scene = scene_get();
 		for (int i = 0; i < DA_COUNT(scene); i++) {
 			game_object go = scene[i];
-			if (go.update)
-				go.update(NULL);
+			for (int j = 0; j < DA_COUNT(go.components); j++) {
+				component comp = go.components[j];
+				if (comp.update)
+					comp.update(comp.args);
+			}
 		}
 		camera_rotate(cam, 0.005f);
 		render_clear();
