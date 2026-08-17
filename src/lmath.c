@@ -5,6 +5,33 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <immintrin.h>
+
+m4 m4mulsimd(const m4 *m1, const m4 *m2)
+{
+	m4 res = {0};
+	/* load whole m1 to SIMD reg */
+	__m128 a = _mm_load_ps(&m2->cmps[0]);
+	__m128 b = _mm_load_ps(&m2->cmps[4]);
+	__m128 c = _mm_load_ps(&m2->cmps[8]);
+	__m128 d = _mm_load_ps(&m2->cmps[12]);
+	for (int i = 0; i < 4; i++) {
+		__m128 col = _mm_load_ps(&m1->cmps[i * 4]);
+
+		__m128 x = _mm_shuffle_ps(col, col, _MM_SHUFFLE(0, 0, 0, 0));
+		__m128 y = _mm_shuffle_ps(col, col, _MM_SHUFFLE(1, 1, 1, 1));
+		__m128 z = _mm_shuffle_ps(col, col, _MM_SHUFFLE(2, 2, 2, 2));
+		__m128 w = _mm_shuffle_ps(col, col, _MM_SHUFFLE(3, 3, 3, 3));
+
+		__m128 result_col = _mm_mul_ps(a, x);
+		result_col = _mm_add_ps(result_col, _mm_mul_ps(b, y));
+		result_col = _mm_add_ps(result_col, _mm_mul_ps(c, z));
+		result_col = _mm_add_ps(result_col, _mm_mul_ps(d, w));
+
+		_mm_store_ps(&res.cmps[i * 4], result_col);
+	}
+	return res;
+}
 
 void v3_print(v3 v)
 {

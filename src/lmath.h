@@ -65,6 +65,7 @@ m4 m4_identity();
 void m4_print(m4);
 v4 m4v4mul(m4, v4);
 m4 m4mul(m4, m4);
+m4 m4mulsimd(const m4 *m1, const m4 *m2);
 m4 m4_rotation_x(float theta);
 m4 m4_rotation_y(float theta);
 m4 m4_rotation_z(float theta);

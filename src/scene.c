@@ -19,7 +19,7 @@ void test_update(void *args)
 int scene_init()
 {
 	DA_ALLOC(scene);
-	uint32_t goid = game_object_make(MN_ICOSPHERE);
+	uint32_t goid = game_object_make(MN_PENG);
 	game_object *go = game_object_get_by_id(goid);
 	component test_comp = {0};
 	test_comp.args = calloc(1, sizeof(int));

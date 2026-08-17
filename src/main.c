@@ -41,6 +41,14 @@ void camera_rotate(struct camera *cam, float speed)
 
 int main(void)
 {
+	m4 m1 = m4_translation(v3mk(1, 2, 3));
+	m4 m2 = m4_rotation_x(M_PI / 3.0f);
+	for (int i = 0; i < 100000000; i++) {
+		m4mulsimd(&m1, &m2);
+	}
+	return 0;
+	/* printf("\n"); */
+	/* m4_print(m4mul(m1, m2)); */
 	int ww = 800;
 	int wh = 600;
 	display_init(ww, wh, "The Dolphin Hotel");
